@@ -7,7 +7,8 @@ import pickle
 
 # --- Thiết lập đường dẫn ---
 BASE_DIR         = Path(__file__).resolve().parent.parent  
-DATA_DIR         = BASE_DIR / "Storing" / "Get_images"                    
+DATA_DIR         = BASE_DIR / "Storing" / "Get_images"      
+DATA_DIR_Video   = BASE_DIR / "Storing" / "Get_videos"              
 OUTPUT_ENCODINGS = BASE_DIR / "Training" / "encodings.pickle"
 
 def train():

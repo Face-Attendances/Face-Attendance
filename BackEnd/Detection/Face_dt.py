@@ -13,6 +13,7 @@ ENC_PATH       = BASE_DIR / "Training"    / "encodings.pickle"
 INFO_FILE      = BASE_DIR / "Detection" / "info.txt"
 ATTEND_CSV     = BASE_DIR / "Database"    / "dihoc.csv"
 DIST_THRESHOLD = 0.5
+SAVE_DIR = BASE_DIR / "Storing" / "Get_images"
 
 # --- Khởi tạo file if needed ---
 INFO_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -23,6 +24,8 @@ if not ATTEND_CSV.exists():
     with open(ATTEND_CSV, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["Name", "Time"])
+
+SAVE_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- Load encodings ---
 with open(ENC_PATH, "rb") as f:
@@ -48,50 +51,56 @@ while True:
     if not ret:
         break
 
-    # Resize và chuyển sang RGB
+    # Resize frame for faster processing
     small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
-    rgb_small   = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
+    rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
 
-    # Phát hiện và encode
-    face_locs = face_recognition.face_locations(rgb_small)
-    face_encs = face_recognition.face_encodings(rgb_small, face_locs)
+    # Find all face locations and encodings in the current frame
+    face_locations = face_recognition.face_locations(rgb_small_frame)
+    face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
-    for enc, loc in zip(face_encs, face_locs):
-        dists = face_recognition.face_distance(known_encodings, enc)
-        if len(dists) == 0:
-            continue
+    for face_encoding in face_encodings:
+        matches = face_recognition.compare_faces(known_encodings, face_encoding, DIST_THRESHOLD)
+        name = "Unknown"
 
-        best_idx  = dists.argmin()
-        best_dist = dists[best_idx]
-        name      = "Unknown"
-
-        if best_dist < DIST_THRESHOLD:
-            name = known_labels[best_idx]
-            if name not in recorded:
-                recorded.add(name)
-                ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-                # Ghi info.txt
-                with open(INFO_FILE, "a", encoding="utf-8") as f:
-                    f.write(f"{ts} - {name}\n")
-
-                # Ghi CSV điểm danh
-                with open(ATTEND_CSV, "a", newline="", encoding="utf-8") as f:
-                    writer = csv.writer(f)
-                    writer.writerow([name, ts])
-
-                print(f"[INFO] Điểm danh: {name} lúc {ts}")
+        if True in matches:
+            match_index = matches.index(True)
+            name = known_labels[match_index]
         else:
-            print(f"[INFO] Unknown face (dist={best_dist:.2f})")
+            # Add new face to encodings and labels
+            known_encodings.append(face_encoding)
+            # Nhập tên folder/người dùng thủ công
+            name = input("Nhập tên folder/người dùng cho khuôn mặt mới: ").strip()
+            if not name:
+                name = f"Person_{len(known_labels) + 1}"
+            known_labels.append(name)
 
-        # Vẽ khung và tên (scale lại ×4)
-        top, right, bottom, left = [v * 4 for v in loc]
-        cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
-        cv2.putText(frame, name, (left, top - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
+            # Save new encoding to file
+            with open(ENC_PATH, "wb") as f:
+                pickle.dump({"encodings": known_encodings, "labels": known_labels}, f)
 
-    cv2.imshow("Webcam Face Recognition", frame)
-    if cv2.waitKey(1) & 0xFF == ord("q"):
+        if name not in recorded:
+            recorded.add(name)
+            print(f"Recognized: {name}")
+
+            # Create folder for the person if not exists
+            person_dir = SAVE_DIR / name
+            person_dir.mkdir(parents=True, exist_ok=True)
+
+            # Save image to the person's folder
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            image_path = person_dir / f"Checkin_{timestamp}.jpg"
+            cv2.imwrite(str(image_path), frame)
+
+            # Log attendance
+            with open(ATTEND_CSV, "a", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow([name, datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
+
+    # Display the resulting frame
+    cv2.imshow("Video", frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 cap.release()

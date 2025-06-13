@@ -5,7 +5,7 @@ import cv2
 from datetime import datetime
 
 class VideoProcessor:
-    def __init__(self, input_file="backend/data_processing/input_info.txt", log_dir="backend/data_processing/logs"):
+    def __init__(self, input_file="BackEnd/data_processing/input_info.txt", log_dir="BackEnd/data_processing/logs"):
         """Khởi tạo VideoProcessor với các tham số cơ bản"""
         self.input_file = Path(input_file)
         self.log_dir = Path(log_dir)
