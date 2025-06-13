@@ -9,9 +9,9 @@ from datetime import datetime
 
 # --- Thiết lập đường dẫn ---
 BASE_DIR       = Path(__file__).resolve().parent.parent
-ENC_PATH       = BASE_DIR / "training"    / "encodings.pickle"
-INFO_FILE      = BASE_DIR / "recognition" / "info.txt"
-ATTEND_CSV     = BASE_DIR / "database"    / "dihoc.csv"
+ENC_PATH       = BASE_DIR / "Training"    / "encodings.pickle"
+INFO_FILE      = BASE_DIR / "Detection" / "info.txt"
+ATTEND_CSV     = BASE_DIR / "Database"    / "dihoc.csv"
 DIST_THRESHOLD = 0.5
 
 # --- Khởi tạo file if needed ---

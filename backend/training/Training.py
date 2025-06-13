@@ -7,8 +7,8 @@ import pickle
 
 # --- Thiết lập đường dẫn ---
 BASE_DIR         = Path(__file__).resolve().parent.parent  
-DATA_DIR         = BASE_DIR / "Images"                    
-OUTPUT_ENCODINGS = BASE_DIR / "training" / "encodings.pickle"
+DATA_DIR         = BASE_DIR / "Storing" / "Get_images"                    
+OUTPUT_ENCODINGS = BASE_DIR / "Training" / "encodings.pickle"
 
 def train():
     if not DATA_DIR.is_dir():
@@ -18,7 +18,7 @@ def train():
     known_encodings = []
     known_labels    = []
 
-    # Duyệt mỗi thư mục con (mỗi người) trong Images/
+    # Duyệt mỗi thư mục con (mỗi người) trong Get_images/
     for person_dir in DATA_DIR.iterdir():
         if not person_dir.is_dir():
             continue
