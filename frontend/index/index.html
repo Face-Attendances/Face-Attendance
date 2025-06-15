@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Điểm Danh Sinh Viên</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+    <img src="../image/logo.png" alt="Logo UTH">
+    </div>
+    <h1 class="header-title"><b>UNIFIED UTH FACIAL RECOGNITION SYSTEM</b></h1>
+    <div class="datetime">
+      <b><i><span id="date">Ngày: --/--/----</span></i></b>
+      <b><i><span id="time">Giờ: --:--</span></i></b><br>
+      <a href="../login/login.html">Đăng xuất</a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="user-page">
+    <!-- Camera Section -->
+    <section class="camera-box">
+      <video id="camera" autoplay playsinline></video>
+    </section>
+
+    <!-- Student Info Section -->
+    <section class="student-info">
+  <div class="student-info-container">
+    <!-- Hình ảnh sinh viên -->
+    <div class="student-photo-wrapper">
+      <img src="../image/Foxbrand.png" alt="Ảnh sinh viên" class="student-photo">
+    </div>
+
+    <!-- Thông tin sinh viên -->
+    <div class="info">
+      <p>Họ tên: <strong id="student-name">Nguyễn Văn A</strong></p>
+      <p>MSSV: <strong id="student-id">12345678</strong></p>
+      <p>Thời gian điểm danh: <strong id="attendance-time">--:--</strong></p>
+
+      <!-- Select Môn học -->
+      <label for="subject-select"><strong>Chọn môn học:</strong></label>
+      <select id="subject-select" class="form-select">
+        <option value="" disabled selected>-- Chọn môn học --</option>
+        <option value="Lập trình C++">Lập trình C++</option>
+        <option value="Cơ sở dữ liệu">Cơ sở dữ liệu</option>
+        <option value="Mạng máy tính">Mạng máy tính</option>
+        <option value="Phát triển Web">Phát triển Web</option>
+      </select>
+
+      <p class="mt-2">Môn đã chọn: <strong id="selected-subject">-- Chọn môn học --</strong></p>
+    </div>
+  </div>
+</section>
+  </main>
+
+  <!-- ATTENDANCE LOG TABLE -->
+  <section class="attendance-log">
+    <h2>📒 Nhật Ký Điểm Danh</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Họ tên</th>
+          <th>MSSV</th>
+          <th>Môn học</th>
+          <th>Trạng thái</th>
+          <th>Thời gian điểm danh</th>
+          
+        </tr>
+      </thead>
+      <tbody id="attendance-table-body">
+        <!-- Dòng dữ liệu sẽ được thêm tự động -->
+      </tbody>
+    </table>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 Hệ thống điểm danh sinh viên.</p>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="../jquery-3.7.1.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
