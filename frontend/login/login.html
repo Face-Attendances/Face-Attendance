@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fox Tech - Đăng nhập</title>
+
+  <!-- jQuery -->
+  <script src="../jquery-3.7.1.min.js"></script>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="login.css" />
+
+  <!-- JavaScript -->
+  <script src="login.js" defer></script>
+</head>
+
+  <body class="d-flex flex-column min-vh-100">
+  <header class="custom-header">
+  <div class="header-container">
+    <div class="header-left">
+      <img src="../image/logo.png" alt="Logo UTH">
+    </div>
+    <h1 class="header-title">WELCOME TO UNIFIED UTH FACIAL RECOGNITION SYSTEM</h1>
+  </div>
+</header>
+
+    <!-- Thời gian hiện tại -->
+    <div class="text-center mt-3 mb-3">
+      <span id="currentDateTime" class="fw-semibold text-secondary fs-2"></span>
+    </div>
+
+    <!-- MAIN LOGIN FORM -->
+    <main class="d-flex justify-content-center align-items-center px-3">
+      <div class="card p-4" style="min-width: 400px;">
+        <h2 class="text-center mb-4">Tài khoản đăng nhập</h2>
+        <form id="inlineLoginForm">
+          <div class="mb-3">
+            <label for="inline-username" class="form-label">Tên đăng nhập</label>
+            <input type="text" id="inline-username" class="form-control" placeholder="Nhập tên đăng nhập" required />
+          </div>
+          <div class="mb-3">
+            <label for="inline-password" class="form-label">Mật khẩu</label>
+            <input type="password" id="inline-password" class="form-control" placeholder="Nhập mật khẩu" required />
+          </div>
+          <div class="mb-3">
+            <button type="button" class="btn btn-primary w-100" id="loginLink">Đăng nhập</button>
+          </div>
+          <div class="text-center mt-3">
+            <a href="forgot-password.html" class="text-decoration-none text-primary">Quên mật khẩu?</a>
+          </div>
+          <div class="text-center mt-2">
+            <span>Bạn chưa có tài khoản? </span>
+            <a href="register.html" class="text-decoration-none text-primary">Đăng ký</a>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-dark text-white text-center py-3 mt-auto">
+    <div class="container">
+      <p class="mb-1">&copy; 2025. All rights reserved.</p>
+      <p class="mb-0">UNIFIED UTH FACIAL RECOGNITION SYSTEM</p>
+    </div>
+  </footer>
+
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function updateDateTime() {
+    const now = new Date();
+
+    // Định dạng ngày giờ: Thứ, dd/mm/yyyy - hh:mm:ss
+    const formatted = now.toLocaleString("vi-VN", {
+      weekday: "long",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+
+    const dateTimeElement = document.getElementById("currentDateTime");
+    if (dateTimeElement) {
+      dateTimeElement.textContent = `🕒 ${formatted}`;
+    }
+  }
+
+  // Cập nhật mỗi giây
+  setInterval(updateDateTime, 1000);
+  updateDateTime(); // Gọi ngay lần đầu
+</script>
+</body>
+</html>

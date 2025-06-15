@@ -1,0 +1,186 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  background: #f0f4f8;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+header {
+  background-color: #3e3e40;
+  color: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-shadow: #1919cb 1px 1px 2px;
+  position: relative;
+  height: auto;
+  flex-wrap: wrap;
+}
+
+.header-title {  
+  font-size: 36px;
+  color: #e4f0f1;
+  font-weight: bold;
+  text-align: center;
+  flex-grow: 1;
+  text-shadow:
+    0 0 5px rgb(10, 154, 61),
+    0 0 10px rgb(233, 241, 236),
+    0 0 20px rgb(10, 154, 61),
+    0 0 40px rgb(10, 154, 61),
+    0 0 60px rgb(10, 154, 61);
+}
+
+.header-left img {
+  width: 150px;
+  height: 100px;
+  margin-right: 15px;
+  object-fit: cover;
+}
+
+.datetime {
+  text-align: right;
+  font-size: 14px;
+}
+
+.datetime a {
+  color: #00ffff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.datetime a:hover {
+  text-decoration: underline;
+}
+
+/* Main Layout */
+main.user-page {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 30px;
+  gap: 40px;
+  flex-grow: 1;
+}
+
+/* Camera Box */
+.camera-box {
+  flex: 1 1 500px;
+  max-width: 640px;
+}
+
+#camera {
+  width: 100%;
+  height: 480px;
+  border: 5px solid #004a99;
+  border-radius: 12px;
+  object-fit: cover;
+  transform: scaleX(-1); /* Không lật */
+}
+
+/* Student Info */
+.student-info-container {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.student-photo-wrapper {
+  flex: 0 0 auto;
+}
+
+.student-photo {
+  width: 250px;
+  height: auto;
+  object-fit: cover;
+  border: 2px solid #007acc;
+}
+
+.info {
+  flex: 1;
+  min-width: 250px;
+}
+
+.info p {
+  margin: 10px 0;
+}
+
+.form-select {
+  padding: 8px 12px;
+  font-size: 16px;
+  margin-top: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.mt-2 {
+  margin-top: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  main.user-page {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .student-info, .camera-box {
+    max-width: 90%;
+  }
+}
+
+.attendance-log {
+  margin: 30px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.attendance-log h2 {
+  margin-bottom: 15px;
+  color: #007acc;
+}
+
+.attendance-log table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attendance-log th, .attendance-log td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.attendance-log th {
+  background-color: #007acc;
+  color: white;
+}
+
+footer {
+  text-align: center;
+  padding: 15px;
+  background-color: #3e3e40;
+  color: white;
+  margin-top: 30px;
+}
+
