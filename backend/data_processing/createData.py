@@ -28,7 +28,7 @@ class VideoProcessor:
         """Đọc thông tin từ file input_info.txt (ID, Tên, Video)"""
         students_info = []
         if not self.input_file.exists():
-            self.log("❌ Không tìm thấy file input_info.txt")
+            self.log(" Không tìm thấy file input_info.txt")
             return []
 
         with open(self.input_file, "r", encoding="utf-8") as f:
@@ -39,7 +39,7 @@ class VideoProcessor:
                     student_id, student_name, video_path = map(str.strip, line.split(";"))
                     students_info.append((student_id, student_name, video_path))
                 except ValueError:
-                    self.log(f"❌ Định dạng không đúng cho dòng: {line}", "general")
+                    self.log(f" Định dạng không đúng cho dòng: {line}", "general")
                     continue
         
         return students_info
@@ -52,38 +52,38 @@ class VideoProcessor:
             # Ghi đè file (tất cả dữ liệu sẽ bị ghi lại từ đầu)
             with open(self.input_file, "w", encoding="utf-8") as f:
                 f.write(f"{student_id};{student_name};{video_path}\n")
-            self.log(f"✅ Thông tin sinh viên {student_name} đã được ghi đè.")
+            self.log(f" Thông tin sinh viên {student_name} đã được ghi đè.")
         
         elif action == "skip":
             # Bỏ qua nếu sinh viên đã tồn tại
             for student in students_info:
                 if student_id == student[0]:  # Kiểm tra nếu sinh viên đã có trong danh sách
-                    self.log(f"❌ Sinh viên {student_name} đã tồn tại, bỏ qua.")
+                    self.log(f" Sinh viên {student_name} đã tồn tại, bỏ qua.")
                     return  # Bỏ qua nếu đã tồn tại
 
             # Nếu không có, thêm mới
             with open(self.input_file, "a", encoding="utf-8") as f:
                 f.write(f"{student_id};{student_name};{video_path}\n")
-            self.log(f"✅ Thông tin sinh viên {student_name} đã được thêm mới.")
+            self.log(f" Thông tin sinh viên {student_name} đã được thêm mới.")
         
         elif action == "append":
             # Thêm mới vào cuối file
             with open(self.input_file, "a", encoding="utf-8") as f:
                 f.write(f"{student_id};{student_name};{video_path}\n")
-            self.log(f"✅ Thông tin sinh viên {student_name} đã được thêm mới.")
+            self.log(f" Thông tin sinh viên {student_name} đã được thêm mới.")
 
     def validate_video(self, video_path):
         """Kiểm tra video có tồn tại và mở được không"""
         if not Path(video_path).exists():
-            self.log(f"❌ Video không tồn tại: {video_path}")
+            self.log(f" Video không tồn tại: {video_path}")
             return False
 
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
-            self.log(f"❌ Không thể mở video. Có thể lỗi codec hoặc sai định dạng: {video_path}")
+            self.log(f" Không thể mở video. Có thể lỗi codec hoặc sai định dạng: {video_path}")
             return False
 
-        self.log(f"✅ Đã mở video thành công: {video_path}")
+        self.log(f" Đã mở video thành công: {video_path}")
         return cap
 
     def save_face(self, frame, student_id, student_name, count):
@@ -109,7 +109,7 @@ class VideoProcessor:
                 # Lưu ảnh khuôn mặt vào thư mục với tên là 'ID_Họ và Tên_{count}.jpg'
                 image_path = student_folder / f"{student_id}_{student_name}_{count}.jpg"
                 cv2.imwrite(str(image_path), face_resized)
-                self.log(f"✅ Lưu ảnh khuôn mặt: {image_path}", student_id)
+                self.log(f" Lưu ảnh khuôn mặt: {image_path}", student_id)
                 return True  # Sau khi lưu một ảnh thì return ngay
 
         return False  # Không tìm thấy khuôn mặt
@@ -137,12 +137,12 @@ class VideoProcessor:
 
             # Dừng nếu đã đủ ảnh (ví dụ: 30 ảnh)
             if saved_count >= 5:
-                self.log(f"✅ Đã lưu đủ 30 ảnh cho sinh viên {student_name} - ID: {student_id}.", student_id)
+                self.log(f" Đã lưu đủ 30 ảnh cho sinh viên {student_name} - ID: {student_id}.", student_id)
                 break
 
         cap.release()
         cv2.destroyAllWindows()
-        self.log(f"✅ Đã lưu {saved_count} khuôn mặt từ video cho {student_name} - ID: {student_id}", student_id)
+        self.log(f" Đã lưu {saved_count} khuôn mặt từ video cho {student_name} - ID: {student_id}", student_id)
 
     def save_video(self, student_id, student_name, video_path):
         """Sao chép video vào thư mục 'Storing/Get_videos' với tên thư mục là mã số sinh viên và tên"""
@@ -151,20 +151,20 @@ class VideoProcessor:
         
         # Kiểm tra nếu thư mục con đã tồn tại
         if destination_folder.exists():
-            self.log(f"❌ Thư mục {folder_name} đã tồn tại, bỏ qua video.", student_id)
+            self.log(f" Thư mục {folder_name} đã tồn tại, bỏ qua video.", student_id)
             return  # Bỏ qua nếu thư mục đã tồn tại, không sao chép video
         else:
             destination_folder.mkdir(parents=True, exist_ok=True)
-            self.log(f"✅ Tạo thư mục {folder_name} thành công.", student_id)
+            self.log(f" Tạo thư mục {folder_name} thành công.", student_id)
         
         video_filename = Path(video_path).name  # Lấy tên file video
         new_video_path = destination_folder / video_filename
         
         try:
             shutil.copy(video_path, new_video_path)  # Sao chép video vào thư mục
-            self.log(f"✅ Video đã được sao chép vào: {new_video_path}", student_id)
+            self.log(f" Video đã được sao chép vào: {new_video_path}", student_id)
         except Exception as e:
-            self.log(f"❌ Đã xảy ra lỗi khi sao chép video: {e}", student_id)
+            self.log(f" Đã xảy ra lỗi khi sao chép video: {e}", student_id)
 
     def run(self):
         """Chạy quá trình xử lý video cho tất cả video trong thư mục Storing/Get_videos"""
@@ -181,7 +181,7 @@ class VideoProcessor:
         for thread in threads:
             thread.join()  # Chờ tất cả các luồng hoàn thành
 
-        self.log("✅ Hoàn thành xử lý tất cả video.", "general")
+        self.log(" Hoàn thành xử lý tất cả video.", "general")
 
 if __name__ == "__main__":
     processor = VideoProcessor(input_file="BackEnd/data_processing/input_info.txt")
