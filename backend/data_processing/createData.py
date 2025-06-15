@@ -3,9 +3,10 @@ from pathlib import Path
 import shutil
 import cv2
 from datetime import datetime
+import threading
 
 class VideoProcessor:
-    def __init__(self, input_file="BackEnd/data_processing/input_info.txt", log_dir="BackEnd/data_processing/logs"):
+    def __init__(self, input_file="Storing/Get_videos/input_info.txt", log_dir="BackEnd/data_processing/logs"):
         """Khởi tạo VideoProcessor với các tham số cơ bản"""
         self.input_file = Path(input_file)
         self.log_dir = Path(log_dir)
@@ -102,7 +103,7 @@ class VideoProcessor:
                 face_resized = cv2.resize(face, (200, 200))
                 
                 # Tạo thư mục cho sinh viên nếu chưa có
-                student_folder = Path(f"data/{student_id}_{student_name}")
+                student_folder = Path(f"Storing/Get_images/{student_id}_{student_name}")
                 student_folder.mkdir(parents=True, exist_ok=True)
                 
                 # Lưu ảnh khuôn mặt vào thư mục với tên là 'ID_Họ và Tên_{count}.jpg'
@@ -135,7 +136,7 @@ class VideoProcessor:
                 saved_count += 1
 
             # Dừng nếu đã đủ ảnh (ví dụ: 30 ảnh)
-            if saved_count >= 30:
+            if saved_count >= 5:
                 self.log(f"✅ Đã lưu đủ 30 ảnh cho sinh viên {student_name} - ID: {student_id}.", student_id)
                 break
 
@@ -144,9 +145,9 @@ class VideoProcessor:
         self.log(f"✅ Đã lưu {saved_count} khuôn mặt từ video cho {student_name} - ID: {student_id}", student_id)
 
     def save_video(self, student_id, student_name, video_path):
-        """Sao chép video vào thư mục 'Getting_data_video' với tên thư mục là mã số sinh viên và tên"""
+        """Sao chép video vào thư mục 'Storing/Get_videos' với tên thư mục là mã số sinh viên và tên"""
         folder_name = f"{student_id}_{student_name}"
-        destination_folder = Path(f"Getting_data_video/{folder_name}")
+        destination_folder = Path(f"Storing/Get_videos/{folder_name}")
         
         # Kiểm tra nếu thư mục con đã tồn tại
         if destination_folder.exists():
@@ -166,20 +167,22 @@ class VideoProcessor:
             self.log(f"❌ Đã xảy ra lỗi khi sao chép video: {e}", student_id)
 
     def run(self):
-        """Chạy quá trình xử lý video cho tất cả video trong thư mục Getting_data_video"""
+        """Chạy quá trình xử lý video cho tất cả video trong thư mục Storing/Get_videos"""
         videos_processed = 0
-        for student_folder in Path("Getting_data_video").iterdir():
-            if student_folder.is_dir():
-                student_id, student_name = student_folder.name.split('_', 1)
-                for video_file in student_folder.glob("*.mp4"):
-                    self.process_video(student_id, student_name, video_file)  # Xử lý video
-                    videos_processed += 1
+        students_info = self.read_input()
 
-        if videos_processed > 0:
-            self.log("✅ Hoàn thành tạo dữ liệu.", "general")
-        else:
-            self.log("❌ Không có video nào được xử lý.", "general")
+        # Tiến hành xử lý video cho từng sinh viên (tạo luồng xử lý riêng cho mỗi sinh viên)
+        threads = []
+        for student_id, student_name, video_path in students_info:
+            thread = threading.Thread(target=self.process_video, args=(student_id, student_name, video_path))
+            threads.append(thread)
+            thread.start()
+
+        for thread in threads:
+            thread.join()  # Chờ tất cả các luồng hoàn thành
+
+        self.log("✅ Hoàn thành xử lý tất cả video.", "general")
 
 if __name__ == "__main__":
-    processor = VideoProcessor()
+    processor = VideoProcessor(input_file="BackEnd/data_processing/input_info.txt")
     processor.run()
