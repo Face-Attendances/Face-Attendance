@@ -1,37 +1,23 @@
-import csv
-import os
+import sqlite3
+from pathlib import Path
 
-def init_db():
-    filename = 'dihoc.csv'
-    
-    # Nếu file chưa tồn tại thì tạo mới và ghi header
-    if not os.path.exists(filename):
-        with open(filename, mode='w', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            writer.writerow(['ID', 'Ten', 'MaMon', 'ThoiGian'])
-        print(f"Đã tạo file {filename} với header.")
-    else:
-        print(f"File {filename} đã tồn tại.")
+DB_PATH = Path(__file__).resolve().parent / 'attendance.db'
 
-# Gọi hàm khi chạy script
-if __name__ == '__main__':
-    init_db()
+def get_connection():
+    conn = sqlite3.connect(DB_PATH, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-#Thêm hàm lưu điểm danh
-def save_attendance(id, name, mamon, time):
-    with open('dihoc.csv', mode='a', newline='', encoding='utf-8') as file:
-        file.write(f"{id},{name},{mamon},{time}\n")
-
-#Thêm hàm lấy danh sách điểm danh theo mã môn
-
-def get_attendance(mamon):
-    records = []
-    try:
-        with open('dihoc.csv', 'r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                if row['MaMon'] == mamon:
-                    records.append(row)
-    except FileNotFoundError:
-        pass  # Có thể log lỗi nếu cần
-    return records
+def import_from_csv(csv_path: str):
+    import csv
+    conn = get_connection()
+    cur = conn.cursor()
+    with open(csv_path, newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            cur.execute(
+                "INSERT INTO database_attendance (user_id, timestamp, present) VALUES (?, ?, ?)",
+                (row['user_id'], row['timestamp'], row['present'])
+            )
+    conn.commit()
+    conn.close()
