@@ -2,3 +2,5 @@ pip install --upgrade pip
 pip install django djangorestframework
 pip install djangorestframework-simplejwt
 pip install scikit-learn
+pip install mysqlclient
+pip install PyMySQL
