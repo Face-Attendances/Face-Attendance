@@ -10,10 +10,21 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+
+
 from pathlib import Path
 import pymysql
 pymysql.install_as_MySQLdb()
 
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Nơi lưu ảnh chụp
+CAPTURED_IMAGES_DIR = BASE_DIR / 'Storing' / 'Get_images'
+# Nơi lưu video đã ghi
+RECORDED_VIDEOS_DIR = BASE_DIR / 'Storing' / 'Get_videos'
+
+OUTPUT_ENCODINGS_FILE = BASE_DIR / "Training" / "encodings.pickle"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +55,10 @@ INSTALLED_APPS = [
     'database.apps.DatabaseConfig',
     'detection.apps.DetectionConfig',
     'training.apps.TrainingConfig',
+    'corsheaders',
+    'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
+    'users' # app mới để quản lý user/auth
 ]
 
 MIDDLEWARE = [
@@ -54,9 +69,17 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ['corsheaders.middleware.CorsMiddleware',] 
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
 ROOT_URLCONF = 'BackEnd.urls'
+CORS_ALLOW_ALL_ORIGINS = True  # hoặc định rõ domains
 
 TEMPLATES = [
     {
@@ -82,16 +105,17 @@ WSGI_APPLICATION = 'BackEnd.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'face_attendances',      # tên database bạn vừa tạo
-        'USER': 'tan',                 # user bạn tạo
-        'PASSWORD': '',
-        'HOST': 'localhost',               # hoặc 'localhost'
+        'NAME': 'face_attendances',
+        'USER': 'tan',
+        'PASSWORD': '123',       
+        'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
+
 
 
 
@@ -113,6 +137,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# settings.py
+AUTH_USER_MODEL = 'users.User'
+# Cấu hình CORS
+CORS_ALLOW_ALL_ORIGINS = True  # Cho phép tất cả các nguồn gốc (origins) truy cập
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/

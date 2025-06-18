@@ -1,6 +1,7 @@
+
 from django.urls import path
-from .views import retrain
+from .views import train_encodings
 
 urlpatterns = [
-    path('retrain/', retrain, name='retrain'),
+    path('train/', train_encodings, name='api-train-encodings'),
 ]

@@ -1,6 +1,9 @@
+# detection/urls.py
+
 from django.urls import path
-from .views import detect_face
+from .views import detect_face, annotate_face
 
 urlpatterns = [
-    path('face/', detect_face, name='detect-face'),
+    path('detect/',   detect_face,   name='api-detect-face'),
+    path('annotate/', annotate_face, name='api-annotate-face'),
 ]

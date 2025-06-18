@@ -1,19 +1,30 @@
+
+import pickle
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.conf import settings
 from .services import train_model
-import os
 
 @api_view(['POST'])
-def retrain(request):
+def train_encodings(request):
     """
-    Gọi train_model với csv_path và trả về kết quả accuracy.
+    POST không cần body.
+    Gọi hàm train_model và trả về số face được mã hóa.
     """
-    csv_file = request.data.get('csv_path')
-    if not csv_file:
-        return Response({'error': 'csv_path is required'}, status=400)
-    model_path = os.path.join(settings.BASE_DIR, 'models', 'rf_model.joblib')
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)
-
-    result = train_model(csv_file, model_path)
-    return Response(result)
+    count = train_model()
+    if count:
+        return Response({'trained_faces': count})
+    return Response({'error': 'No faces found to train'}, status=400)
+@api_view(['GET'])
+def get_training_status(request):
+    """
+    GET để kiểm tra trạng thái training.
+    Trả về JSON: { trained_faces: <số lượng> }
+    """
+    from .services import OUTPUT_ENCODINGS
+    if not OUTPUT_ENCODINGS.exists():
+        return Response({'trained_faces': 0})
+    
+    with open(OUTPUT_ENCODINGS, 'rb') as f:
+        data = pickle.load(f)
+    
+    return Response({'trained_faces': len(data['encodings'])})  
