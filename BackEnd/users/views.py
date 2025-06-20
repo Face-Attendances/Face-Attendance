@@ -1,7 +1,8 @@
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .serializers import RegisterSerializer, LoginSerializer, ForgotPasswordSerializer
+from .serializers import RegisterSerializer, LoginSerializer, ForgotPasswordSerializer, UserProfileSerializer
 
 @api_view(['POST'])
 def register(request):
@@ -24,4 +25,22 @@ def forgot_password(request):
     if ser.is_valid():
         ser.save()
         return Response({"msg":"Đã gửi link reset"}, status=200)
+    return Response(ser.errors, status=400)
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    """
+    GET:  Lấy thông tin user hiện tại
+    PUT:  Chỉnh sửa thông tin cá nhân (partial update)
+    """
+    user = request.user
+    if request.method == 'GET':
+        ser = UserProfileSerializer(user)
+        return Response(ser.data)
+
+    ser = UserProfileSerializer(user, data=request.data, partial=True)
+    if ser.is_valid():
+        ser.save()
+        return Response(ser.data)
     return Response(ser.errors, status=400)

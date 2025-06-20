@@ -41,6 +41,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'users.User'
+
 
 # Application definition
 
@@ -58,7 +60,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
-    'users' # app mới để quản lý user/auth
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -69,7 +71,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    ['corsheaders.middleware.CorsMiddleware',] 
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 REST_FRAMEWORK = {
@@ -106,9 +108,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'face_attendances',
-        'USER': 'tan',
-        'PASSWORD': '123',       
-        'HOST': 'localhost',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {
         'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -137,8 +139,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# settings.py
-AUTH_USER_MODEL = 'users.User'
 # Cấu hình CORS
 CORS_ALLOW_ALL_ORIGINS = True  # Cho phép tất cả các nguồn gốc (origins) truy cập
 
