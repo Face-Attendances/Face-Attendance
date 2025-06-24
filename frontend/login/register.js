@@ -22,18 +22,28 @@ document.getElementById("registerForm").addEventListener("submit", function (e) 
     return;
   }
 
+  // Xét vai trò tự động dựa theo username
+  let role = "student"; // mặc định
+  const lower = username.toLowerCase();
+  if (lower === "admin") {
+    role = "admin";
+  } else if (lower.includes("gv") || lower.includes("teacher")) {
+    role = "teacher";
+  }
+
   const userObj = {
+    username,
     password,
     fullName,
     studentID,
+    role,
     phone: "",
     address: "",
-    products: [],
-    role: username.toLowerCase().includes("admin") ? "admin" : "user"
+    products: []
   };
 
   localStorage.setItem("user_" + username, JSON.stringify(userObj));
-  alert("Đăng ký thành công! Bạn có thể đăng nhập.");
-  this.reset(); // Xoá dữ liệu nhập vào
+  alert("Đăng ký thành công với vai trò: " + role.toUpperCase());
+  this.reset();
   window.location.href = "login.html";
 });

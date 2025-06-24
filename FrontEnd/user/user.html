@@ -14,11 +14,18 @@
     <img src="../image/logo.png" alt="Logo UTH">
     </div>
     <h1 class="header-title"><b>UNIFIED UTH FACIAL RECOGNITION SYSTEM</b></h1>
-    <div class="datetime">
-      <b><i><span id="date">Ngày: --/--/----</span></i></b>
-      <b><i><span id="time">Giờ: --:--</span></i></b><br>
+    <div class="user-options">
+    <b><i><span id="date">Ngày: --/--/----</span></i></b>
+   <b><i><span id="time">Giờ: --:--</span></i></b><br>
+
+    <div class="dropdown">
+    <button id="userMenuBtn">👤 Tài khoản ▾</button>
+    <div id="userDropdown" class="dropdown-content">
+      <a href="profile.html">Thông tin cá nhân</a>
       <a href="../login/login.html">Đăng xuất</a>
     </div>
+  </div>
+</div>
   </header>
 
   <!-- MAIN CONTENT -->
@@ -38,10 +45,23 @@
 
     <!-- Thông tin sinh viên -->
     <div class="info">
-      <p>Họ tên: <strong id="student-name">Nguyễn Văn A</strong></p>
-      <p>MSSV: <strong id="student-id">12345678</strong></p>
-      <p>Thời gian điểm danh: <strong id="attendance-time">--:--</strong></p>
+  <p>Họ tên: <strong id="student-name">Nguyễn Văn A</strong></p>
+  <p>MSSV: <strong id="student-id">12345678</strong></p>
+  <p>Lớp: <strong id="student-class">CTK42</strong></p>
+  <p>Khóa học: <strong id="student-course">Công nghệ thông tin</strong></p>
 
+  <!-- Phần sẽ ẩn/hiện -->
+  <div id="more-info" style="display: none;">
+    <p>Ngày sinh: <strong id="student-dob">01/01/2000</strong></p>
+    <p>Email: <strong id="student-email">nguyenvana@example.com</strong></p>
+    <p>Số điện thoại: <strong id="student-phone">0123456789</strong></p>
+    <p>Địa chỉ: <strong id="student-address">Hà Nội</strong></p>
+  </div>
+
+  <p>Thời gian điểm danh: <strong id="attendance-time">--:--</strong></p>
+  <p>
+    <span id="toggle-more-btn" style="font-size: 13px; text-decoration: underline; cursor: pointer;"><i>Xem thêm</i></span>
+  </p>
       <!-- Select Môn học -->
       <label for="subject-select"><strong>Chọn môn học:</strong></label>
       <select id="subject-select" class="form-select">
@@ -87,5 +107,23 @@
   <!-- JavaScript -->
   <script src="../jquery-3.7.1.min.js"></script>
   <script src="script.js"></script>
+  <script>
+    $(document).ready(function () {
+      const currentUser = localStorage.getItem("currentUser");
+      const userData = JSON.parse(localStorage.getItem("user_" + currentUser));
+      if (userData) {
+        $('#student-name').text(userData.fullName || '...');
+        $('#student-id').text(userData.studentID || '...');
+        $('#student-class').text(userData.class || '...');
+        $('#student-course').text(userData.course || '...');
+        $('#student-dob').text(userData.dob || '...');
+        $('#student-email').text(userData.email || '...');
+        $('#student-phone').text(userData.phone || '...');
+  $('#student-address').text(userData.address || '...');
+}
+
+  });
+</script>
+
 </body>
 </html>

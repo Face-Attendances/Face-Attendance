@@ -101,7 +101,6 @@ User = get_user_model()
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model  = User
-        # username read-only, các trường khác có thể chỉnh sửa
         fields = [
             'username',
             'full_name',
@@ -113,5 +112,5 @@ class UserProfileSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             'username':    {'read_only': True},
-            'student_code':{'read_only': True},  # nếu không muốn user đổi mã sinh viên
+            'student_code':{'read_only': True},  
         }

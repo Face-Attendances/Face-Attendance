@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Giảng viên - Quản lý điểm danh</title>
+  <link rel="stylesheet" href="../../admin/admin.css">
+</head>
+<body>
+  <nav class="navbar">
+    <ul>
+      <li><a href="user_gv.html">Trang chủ</a></li>
+      <li><a href="student_gv.html">Quản lý sinh viên</a></li>
+      <li><a href="log_gv.html">Nhật ký điểm danh</a></li>
+      <li><a href="../../login/login.html">Đăng xuất</a></li>
+    </ul>
+  </nav>
+
+  <main class="admin-page">
+    <h2>📋 Danh sách sinh viên lớp bạn phụ trách</h2>
+    <table class="attendance-table">
+      <thead>
+        <th>STT</th>
+          <th>MSSV</th>
+          <th>Họ tên</th>
+          <th>Lớp</th>
+          <th>Khóa học</th>
+          <th>Ngày sinh</th>
+          <th>Giới tính</th>  
+          <th>Địa chỉ</th>
+          <th>Số điện thoại</th>
+          <th>Email</th>
+          <th>Trạng thái</th>
+          <th>Thao tác</th>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>12345678</td>
+          <td>Nguyễn Văn A</td>
+          <td>DHKTPM17A</td>
+          <td>2020</td>
+          <td>01/01/2000</td>
+          <td>Nam</td>
+          <td>123 Đường ABC, Quận 1</td>
+          <td>0123456789</td>
+          <td>mail@example.com</td>
+          <td>✅ Đã điểm danh</td>
+          <td><button>Sửa</button> <button>Xoá</button></td>
+        </tr>
+        <!-- Thêm nhiều sinh viên -->
+      </tbody>
+    </table>
+
+    <h2>✅ Danh sách đã điểm danh</h2>
+    <table class="attendance-table">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>MSSV</th>
+          <th>Họ tên</th>
+          <th>Môn học</th>
+          <th>Giờ điểm danh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>12345678</td>
+          <td>Nguyễn Văn A</td>
+          <td>Phát triển Web</td>
+          <td>08:05</td>
+        </tr>
+        <!-- Dữ liệu thật từ backend -->
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

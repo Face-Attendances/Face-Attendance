@@ -24,8 +24,13 @@ loginBtn.onclick = function () {
 
     if (user.role === "admin") {
       window.location.href = "../admin/admin.html";
+    } else if (user.role === "teacher") 
+      {
+      window.location.href = "../user/user_gv/user_gv.html";
+    } else if (user.role === "student") {
+      window.location.href = "../user/user.html";
     } else {
-      window.location.href = "../index/index.html";
+      alert("Vai trò người dùng không hợp lệ!");
     }
   } else {
     alert("Sai mật khẩu!");
