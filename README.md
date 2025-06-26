@@ -24,4 +24,6 @@ chạy cam = python manage.py run_attendance
 chạy train = python manage.py train_encodings
 dùng khi chỉnh DB = python manage.py migrate 
 chạy server (test Postman) = python manage.py runserver
-Tạo tài khoản admin (superuser) cho site = python manage.py createsuperuser             
+Tạo tài khoản admin (superuser) cho site = python manage.py createsuperuser      
+       
+Superuser updated: username=admin, student_code=123456789012

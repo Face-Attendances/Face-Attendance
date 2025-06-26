@@ -29,6 +29,7 @@ class Attendance(models.Model):
 class Subject(models.Model):
     subject_name = models.CharField(max_length=100)
     time = models.CharField(max_length=100)
+    for_teacher = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.subject_name} ({self.time})"
+        return f"{self.subject_name} ({'GV' if self.for_teacher else 'SV'})"

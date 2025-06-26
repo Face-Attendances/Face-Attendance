@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Điểm Danh Sinh Viên</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,21 +12,21 @@
   <!-- HEADER -->
   <header>
     <div class="header-left">
-    <img src="../image/logo.png" alt="Logo UTH">
+      <img src="../image/logo.png" alt="Logo UTH">
     </div>
     <h1 class="header-title"><b>UNIFIED UTH FACIAL RECOGNITION SYSTEM</b></h1>
     <div class="user-options">
-    <b><i><span id="date">Ngày: --/--/----</span></i></b>
-   <b><i><span id="time">Giờ: --:--</span></i></b><br>
+      <b><i><span id="date">Ngày: --/--/----</span></i></b>
+      <b><i><span id="time">Giờ: --:--</span></i></b><br>
 
-    <div class="dropdown">
-    <button id="userMenuBtn">👤 Tài khoản ▾</button>
-    <div id="userDropdown" class="dropdown-content">
-      <a href="profile.html">Thông tin cá nhân</a>
-      <a href="../login/login.html">Đăng xuất</a>
+      <div class="dropdown">
+        <button id="userMenuBtn">👤 Tài khoản ▾</button>
+        <div id="userDropdown" class="dropdown-content">
+          <a href="profile.html">Thông tin cá nhân</a>
+          <a href="../login/login.html">Đăng xuất</a>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
   </header>
 
   <!-- MAIN CONTENT -->
@@ -37,45 +38,42 @@
 
     <!-- Student Info Section -->
     <section class="student-info">
-  <div class="student-info-container">
-    <!-- Hình ảnh sinh viên -->
-    <div class="student-photo-wrapper">
-      <img src="../image/Foxbrand.png" alt="Ảnh sinh viên" class="student-photo">
-    </div>
+      <div class="student-info-container">
+        <!-- Hình ảnh sinh viên -->
+        <div class="student-photo-wrapper">
+          <img src="../image/Foxbrand.png" alt="Ảnh sinh viên" class="student-photo">
+        </div>
 
-    <!-- Thông tin sinh viên -->
-    <div class="info">
-  <p>Họ tên: <strong id="student-name">Nguyễn Văn A</strong></p>
-  <p>MSSV: <strong id="student-id">12345678</strong></p>
-  <p>Lớp: <strong id="student-class">CTK42</strong></p>
-  <p>Khóa học: <strong id="student-course">Công nghệ thông tin</strong></p>
+        <!-- Thông tin sinh viên -->
+        <div class="info">
+          <p>Họ tên: <strong id="student-name">Nguyễn Văn A</strong></p>
+          <p>MSSV: <strong id="student-id">12345678</strong></p>
+          <p>Lớp: <strong id="student-class">CTK42</strong></p>
+          <p>Khóa học: <strong id="student-course">Công nghệ thông tin</strong></p>
 
-  <!-- Phần sẽ ẩn/hiện -->
-  <div id="more-info" style="display: none;">
-    <p>Ngày sinh: <strong id="student-dob">01/01/2000</strong></p>
-    <p>Email: <strong id="student-email">nguyenvana@example.com</strong></p>
-    <p>Số điện thoại: <strong id="student-phone">0123456789</strong></p>
-    <p>Địa chỉ: <strong id="student-address">Hà Nội</strong></p>
-  </div>
+          <!-- Phần sẽ ẩn/hiện -->
+          <div id="more-info" style="display: none;">
+            <p>Ngày sinh: <strong id="student-dob">01/01/2000</strong></p>
+            <p>Email: <strong id="student-email">nguyenvana@example.com</strong></p>
+            <p>Số điện thoại: <strong id="student-phone">0123456789</strong></p>
+            <p>Địa chỉ: <strong id="student-address">Hà Nội</strong></p>
+          </div>
 
-  <p>Thời gian điểm danh: <strong id="attendance-time">--:--</strong></p>
-  <p>
-    <span id="toggle-more-btn" style="font-size: 13px; text-decoration: underline; cursor: pointer;"><i>Xem thêm</i></span>
-  </p>
-      <!-- Select Môn học -->
-      <label for="subject-select"><strong>Chọn môn học:</strong></label>
-      <select id="subject-select" class="form-select">
-        <option value="" disabled selected>-- Chọn môn học --</option>
-        <option value="Lập trình C++">Lập trình C++</option>
-        <option value="Cơ sở dữ liệu">Cơ sở dữ liệu</option>
-        <option value="Mạng máy tính">Mạng máy tính</option>
-        <option value="Phát triển Web">Phát triển Web</option>
-      </select>
+          <p>Thời gian điểm danh: <strong id="attendance-time">--:--</strong></p>
+          <p>
+            <span id="toggle-more-btn" style="font-size: 13px; text-decoration: underline; cursor: pointer;"><i>Xem
+                thêm</i></span>
+          </p>
+          <!-- Select Môn học -->
+          <label for="subject-select"><strong>Chọn môn học:</strong></label>
+          <select id="subject-select" class="form-select">
+            <option value="" disabled selected>-- Chọn môn học --</option>
+          </select>
 
-      <p class="mt-2">Môn đã chọn: <strong id="selected-subject">-- Chọn môn học --</strong></p>
-    </div>
-  </div>
-</section>
+          <p class="mt-2">Môn đã chọn: <strong id="selected-subject">-- Chọn môn học --</strong></p>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- ATTENDANCE LOG TABLE -->
@@ -90,7 +88,7 @@
           <th>Môn học</th>
           <th>Trạng thái</th>
           <th>Thời gian điểm danh</th>
-          
+
         </tr>
       </thead>
       <tbody id="attendance-table-body">
@@ -119,11 +117,12 @@
         $('#student-dob').text(userData.dob || '...');
         $('#student-email').text(userData.email || '...');
         $('#student-phone').text(userData.phone || '...');
-  $('#student-address').text(userData.address || '...');
-}
+        $('#student-address').text(userData.address || '...');
+      }
 
-  });
-</script>
+    });
+  </script>
 
 </body>
+
 </html>

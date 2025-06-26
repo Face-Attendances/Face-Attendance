@@ -4,3 +4,4 @@ pip install djangorestframework-simplejwt
 pip install scikit-learn
 pip install mysqlclient
 pip install django-cors-headers
+pip install opencv-python-headless numpy

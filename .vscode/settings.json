@@ -1,0 +1,5 @@
+{
+    // ...các setting khác...
+    "liveServer.settings.port": 8000,
+    "liveServer.settings.root": "/FrontEnd", // hoặc đường dẫn tới thư mục gốc front-end của bạn
+}

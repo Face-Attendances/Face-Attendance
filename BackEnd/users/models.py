@@ -4,20 +4,36 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     full_name = models.CharField(max_length=100, blank=True)
-    student_code = models.CharField(max_length=20, blank=True, unique=True)  # Added unique=True
+    student_code = models.CharField(max_length=20, blank=True, null=True, unique=True)
     student = models.ForeignKey(
         'database.Student',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='StudentUser'  
+        related_name='StudentUser'
     )
-    address       = models.CharField(max_length=255, blank=True)
-    phone_number  = models.CharField(max_length=20,  blank=True)
-    student_class = models.CharField(max_length=50,  blank=True)
+    address = models.CharField(max_length=255, blank=True)
+    phone_number = models.CharField(max_length=20, blank=True)
+    student_class = models.CharField(max_length=50, blank=True)
+    email = models.EmailField(max_length=254, unique=True)
+
+    REQUIRED_FIELDS = ['email', 'student_code']
+    
+    ROLE_CHOICES = [
+        ('student', 'Sinh viên'),
+        ('teacher', 'Giảng viên'),
+        ('admin', 'Quản trị'),
+    ]
+    role = models.CharField(
+        max_length=10,
+        choices=ROLE_CHOICES,
+        default='student',
+    )
 
     def __str__(self):
         return self.username
+
+
 class Migration(migrations.Migration):
 
     dependencies = [

@@ -1,10 +1,13 @@
 # detection/views.py
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from django.conf import settings
 from pathlib import Path
 from .utils import FaceDetector
+import numpy as np
+import cv2
 
 detector = FaceDetector()
 
@@ -17,6 +20,9 @@ def detect_face(request):
     img = request.FILES.get('image')
     if not img:
         return Response({'error': 'No image provided'}, status=400)
+    ext = Path(img.name).suffix.lower()
+    if ext not in ['.jpg', '.jpeg', '.png']:
+        return Response({'error': 'Only .jpg, .jpeg, and .png formats are allowed'}, status=400)
 
     tmp = Path(settings.MEDIA_ROOT) / img.name
     tmp.parent.mkdir(exist_ok=True)
@@ -50,3 +56,30 @@ def annotate_face(request):
     detector.draw_faces(str(in_path), str(out_path))
     url = f"{settings.MEDIA_URL}uploads/{out_path.name}"
     return Response({'boxed_image_url': url})
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser])
+def process_image(request):
+    # 1. Lấy file từ client (form-data key="image")
+    img_file = request.FILES.get('image')
+    if not img_file:
+        return Response({'error': 'No image uploaded'}, status=400)
+
+    # 2. Chuyển file bytes thành numpy array rồi decode ảnh
+    file_bytes = np.frombuffer(img_file.read(), np.uint8)
+    img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+
+    # 3. Xử lý OpenCV: chuyển sang grayscale, detect face, etc.
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # Dùng sẵn cascade của OpenCV
+    face_cascade = cv2.CascadeClassifier(
+        cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+    )
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+
+    # 4. Chuẩn bị kết quả JSON
+    results = []
+    for (x, y, w, h) in faces:
+        results.append({'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h)})
+
+    return Response({'faces': results})

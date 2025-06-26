@@ -6,11 +6,6 @@ from django.db import models
 
 User = get_user_model()
 
-from rest_framework import serializers
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
 class RegisterSerializer(serializers.ModelSerializer):
     student_code     = serializers.CharField(write_only=True)
     password_confirm = serializers.CharField(write_only=True)
@@ -52,28 +47,34 @@ class RegisterSerializer(serializers.ModelSerializer):
             student_code= student_code,
             email       = email,
         )
-        # gán role admin
-        user.is_staff     = True
-        user.is_superuser = True
         user.save()
         return user
 
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+    student_code = serializers.CharField(max_length=12)
+    password     = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        from django.contrib.auth import authenticate
-        user = authenticate(**data)
-        if not user:
-            raise serializers.ValidationError("Invalid credentials.")
+        student_code = data.get('student_code')
+        password     = data.get('password')
+
+        # 1. Lấy user qua student_code
+        try:
+            user = User.objects.get(student_code=student_code)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("MSSV hoặc mật khẩu không đúng.")
+
+        # 2. Kiểm tra mật khẩu
+        if not user.check_password(password):
+            raise serializers.ValidationError("MSSV hoặc mật khẩu không đúng.")
+
+        # 3. Tạo JWT
         refresh = RefreshToken.for_user(user)
         return {
-            'status': 'success',
-            'user_id': user.id,
             'refresh': str(refresh),
             'access':  str(refresh.access_token),
+            'role':    getattr(user, 'role', 'student'),
         }
 
 class ForgotPasswordSerializer(serializers.Serializer):

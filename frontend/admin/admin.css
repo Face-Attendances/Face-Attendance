@@ -1,3 +1,8 @@
+/* admin.css */
+
+/*--------------------
+  Global
+--------------------*/
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -5,33 +10,67 @@ body {
   background-color: #f4f4f4;
 }
 
+/*--------------------
+  Navbar
+--------------------*/
 .navbar {
   background-color: #3e3e40;
-  padding: 10px;
+  padding: 0;
 }
 
 .navbar ul {
   list-style: none;
   display: flex;
-  justify-content: space-around;
+  align-items: center;
   margin: 0;
-  padding: 0;
+  padding: 0 20px;
+  height: 50px;
 }
 
-.navbar a {
-  color: white;
+/* Các mục nav (trừ nút Đăng xuất) đều tản ra với khoảng cách đều */
+.navbar ul li:not(:last-child) {
+  margin: 0 20px;
+}
+
+/* Nút Đăng xuất căn về bên phải */
+.navbar ul li:last-child {
+  margin-left: auto;
+}
+
+.navbar ul li a {
+  color: #fff;
   text-decoration: none;
+  padding: 10px 8px;
+  display: block;
   font-weight: bold;
+  font-size: 1.125rem;
+  /* tăng kích thước chữ */
+  transition: background-color 0.2s;
 }
 
+.navbar ul li a:hover,
+.navbar ul li a.active {
+  background-color: #575759;
+  border-radius: 4px;
+}
+
+/*--------------------
+  Admin page layout
+--------------------*/
 .admin-page {
   padding: 20px;
 }
 
+/*--------------------
+  Headings
+--------------------*/
 h2 {
   color: #004a99;
 }
 
+/*--------------------
+  Search box
+--------------------*/
 .search-box {
   width: 300px;
   padding: 8px;
@@ -40,10 +79,13 @@ h2 {
   border-radius: 4px;
 }
 
+/*--------------------
+  Attendance table
+--------------------*/
 .attendance-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: #fff;
 }
 
 .attendance-table th,
@@ -55,4 +97,13 @@ h2 {
 
 .attendance-table th {
   background-color: #f0f0f0;
+}
+
+/* Footer */
+footer {
+  background-color: #e9ecef;
+  color: #333;
+  text-align: center;
+  padding: 12px 0;
+  font-size: 0.9rem;
 }

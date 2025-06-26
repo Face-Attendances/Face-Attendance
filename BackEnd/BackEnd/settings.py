@@ -43,6 +43,10 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'users.User'
 
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'FrontEnd',   # <-- point this at your actual front-end folder
+]
 
 # Application definition
 
