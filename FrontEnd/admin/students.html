@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý sinh viên - Hệ thống điểm danh khuôn mặt</title>
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="overview.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="students.html" class="active"><i class="fas fa-user-graduate"></i> Sinh viên</a></li>
+            <li><a href="teachers.html"><i class="fas fa-chalkboard-teacher"></i> Giảng viên</a></li>
+            <li><a href="subjects.html"><i class="fas fa-book"></i> Môn học</a></li>
+            <li><a href="attendance_log.html"><i class="fas fa-clipboard-check"></i> Điểm danh</a></li>
+            <li><a href="../login/login.html"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-container">
+        <div class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Quản lý sinh viên</h2>
+                <button class="btn btn-primary" onclick="openModal('addStudentModal')">
+                    <i class="fas fa-plus"></i> Thêm sinh viên
+                </button>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-box" id="searchStudent" placeholder="Tìm kiếm theo mã SV, tên, lớp...">
+                <select class="filter-select" id="filterClass">
+                    <option value="">Tất cả lớp</option>
+                </select>
+                <button class="btn btn-success" onclick="exportStudents()">
+                    <i class="fas fa-download"></i> Xuất Excel
+                </button>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Mã SV</th>
+                        <th>Họ và tên</th>
+                        <th>Lớp</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTable">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Student Modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="studentModalTitle">Thêm sinh viên mới</h3>
+                <span class="close" onclick="closeModal('addStudentModal')">&times;</span>
+            </div>
+            <form id="studentForm">
+                <input type="hidden" id="studentId" name="id">
+                <div class="form-group">
+                    <label class="form-label">Mã sinh viên *</label>
+                    <input type="text" class="form-input" name="student_code" id="studentCode" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Họ và tên *</label>
+                    <input type="text" class="form-input" name="name" id="studentName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Lớp *</label>
+                    <input type="text" class="form-input" name="student_class" id="studentClass" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ngày sinh * (dd/mm/yyyy)</label>
+                    <input type="text" class="form-input" name="dayofbirth" id="studentDayofbirth"
+                        placeholder="dd/mm/yyyy" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" name="email" id="studentEmail">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Số điện thoại</label>
+                    <input type="tel" class="form-input" name="phone" id="studentPhone">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Địa chỉ</label>
+                    <textarea class="form-textarea" name="address" id="studentAddress" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" id="studentSubmitBtn">Thêm sinh viên</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('addStudentModal')">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Xác nhận xóa</h3>
+                <span class="close" onclick="closeModal('deleteModal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <p>Bạn có chắc chắn muốn xóa sinh viên <strong id="deleteStudentName"></strong>?</p>
+                <p>Hành động này không thể hoàn tác.</p>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Xóa</button>
+                <button type="button" class="btn btn-primary" onclick="closeModal('deleteModal')">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth_helper.js"></script>
+    <script src="students.js"></script>
+    <script src="test_auth.js"></script>
+</body>
+
+</html>

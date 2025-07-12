@@ -31,70 +31,164 @@
 
   <!-- MAIN CONTENT -->
   <main class="user-page">
-    <!-- Camera Section -->
-    <section class="camera-box">
-      <video id="camera" autoplay playsinline></video>
+    <!-- Left Column - Profile -->
+    <section class="profile-section">
+      <div class="profile-card">
+        <div class="profile-header">
+          <h3>👤 Thông tin cá nhân</h3>
+        </div>
+        <div class="profile-photo">
+        </div>
+        <div class="profile-info">
+          <div class="info-item">
+            <label>Họ tên:</label>
+            <span id="student-name">Nguyễn Văn A</span>
+          </div>
+          <div class="info-item">
+            <label>MSSV:</label>
+            <span id="student-id">12345678</span>
+          </div>
+          <div class="info-item">
+            <label>Lớp:</label>
+            <span id="student-class">CTK42</span>
+          </div>
+          <div class="info-item">
+            <label>Khóa học:</label>
+            <span id="student-course">Công nghệ thông tin</span>
+          </div>
+          <div class="info-item">
+            <label>Email:</label>
+            <span id="student-email">nguyenvana@example.com</span>
+          </div>
+          <div class="info-item">
+            <label>Số điện thoại:</label>
+            <span id="student-phone">0123456789</span>
+          </div>
+          <div class="info-item">
+            <label>Địa chỉ:</label>
+            <span id="student-address">Hà Nội</span>
+          </div>
+        </div>
+        <div class="profile-actions">
+          <button id="edit-info-btn" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Sửa thông tin
+          </button>
+        </div>
+      </div>
     </section>
 
-    <!-- Student Info Section -->
-    <section class="student-info">
-      <div class="student-info-container">
-        <!-- Hình ảnh sinh viên -->
-        <div class="student-photo-wrapper">
-          <img src="../image/Foxbrand.png" alt="Ảnh sinh viên" class="student-photo">
+    <!-- Center Column - Webcam -->
+    <section class="webcam-section">
+      <div class="webcam-card">
+        <div class="webcam-header">
+          <h3>📹 Camera điểm danh</h3>
+          <div class="webcam-status" id="webcam-status">Đang khởi tạo...</div>
+        </div>
+        <div class="webcam-container">
+          <video id="camera" autoplay playsinline></video>
+          <div class="webcam-overlay" id="webcam-overlay">
+            <div class="face-frame"></div>
+          </div>
+        </div>
+        <div class="webcam-controls">
+          <button id="start-camera-btn" class="btn btn-success">
+            <i class="fas fa-camera"></i> Bật camera
+          </button>
+          <button id="stop-camera-btn" class="btn btn-danger" style="display: none;">
+            <i class="fas fa-stop"></i> Tắt camera
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column - Subject & Attendance -->
+    <section class="attendance-section">
+      <div class="attendance-card">
+        <div class="attendance-header">
+          <h3>📚 Chọn môn học & Điểm danh</h3>
         </div>
 
-        <!-- Thông tin sinh viên -->
-        <div class="info">
-          <p>Họ tên: <strong id="student-name">Nguyễn Văn A</strong></p>
-          <p>MSSV: <strong id="student-id">12345678</strong></p>
-          <p>Lớp: <strong id="student-class">CTK42</strong></p>
-          <p>Khóa học: <strong id="student-course">Công nghệ thông tin</strong></p>
-
-          <!-- Phần sẽ ẩn/hiện -->
-          <div id="more-info" style="display: none;">
-            <p>Ngày sinh: <strong id="student-dob">01/01/2000</strong></p>
-            <p>Email: <strong id="student-email">nguyenvana@example.com</strong></p>
-            <p>Số điện thoại: <strong id="student-phone">0123456789</strong></p>
-            <p>Địa chỉ: <strong id="student-address">Hà Nội</strong></p>
-          </div>
-
-          <p>Thời gian điểm danh: <strong id="attendance-time">--:--</strong></p>
-          <p>
-            <span id="toggle-more-btn" style="font-size: 13px; text-decoration: underline; cursor: pointer;"><i>Xem
-                thêm</i></span>
-          </p>
-          <!-- Select Môn học -->
+        <!-- Subject Selection -->
+        <div class="subject-selection">
           <label for="subject-select"><strong>Chọn môn học:</strong></label>
           <select id="subject-select" class="form-select">
             <option value="" disabled selected>-- Chọn môn học --</option>
           </select>
+          <div class="selected-subject-info">
+            <p>Môn đã chọn: <strong id="selected-subject">-- Chọn môn học --</strong></p>
+          </div>
+        </div>
 
-          <p class="mt-2">Môn đã chọn: <strong id="selected-subject">-- Chọn môn học --</strong></p>
+        <!-- Attendance Status -->
+        <div class="attendance-status">
+          <div class="status-item">
+            <label>Trạng thái:</label>
+            <span id="attendance-status" class="status-badge status-pending">Chưa điểm danh</span>
+          </div>
+          <div class="status-item">
+            <label>Thời gian:</label>
+            <span id="attendance-time">--:--</span>
+          </div>
+        </div>
+
+        <!-- Attendance Actions -->
+        <div class="attendance-actions">
+          <button id="start-attendance-btn" class="btn btn-primary btn-large" disabled>
+            <i class="fas fa-play"></i> Bắt đầu điểm danh
+          </button>
+          <button id="stop-attendance-btn" class="btn btn-danger btn-large" style="display: none;">
+            <i class="fas fa-stop"></i> Dừng điểm danh
+          </button>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+          <div class="stat-item">
+            <div class="stat-number" id="total-attendance">0</div>
+            <div class="stat-label">Tổng điểm danh</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="today-attendance">0</div>
+            <div class="stat-label">Hôm nay</div>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- ATTENDANCE LOG TABLE -->
-  <section class="attendance-log">
-    <h2>📒 Nhật Ký Điểm Danh</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>STT</th>
-          <th>Họ tên</th>
-          <th>MSSV</th>
-          <th>Môn học</th>
-          <th>Trạng thái</th>
-          <th>Thời gian điểm danh</th>
+  <!-- ATTENDANCE HISTORY -->
+  <section class="attendance-history">
+    <div class="history-header">
+      <h2>📒 Lịch sử điểm danh</h2>
+      <div class="history-filters">
+        <input type="date" id="date-filter" class="form-input">
+        <select id="subject-filter" class="form-select">
+          <option value="">Tất cả môn học</option>
+        </select>
+        <button id="refresh-history-btn" class="btn btn-secondary">
+          <i class="fas fa-refresh"></i> Làm mới
+        </button>
+      </div>
+    </div>
 
-        </tr>
-      </thead>
-      <tbody id="attendance-table-body">
-        <!-- Dòng dữ liệu sẽ được thêm tự động -->
-      </tbody>
-    </table>
+    <div class="history-table-container">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Ngày</th>
+            <th>Thời gian</th>
+            <th>Môn học</th>
+            <th>Giảng viên</th>
+            <th>Trạng thái</th>
+            <th>Độ chính xác</th>
+          </tr>
+        </thead>
+        <tbody id="attendance-table-body">
+          <!-- Dòng dữ liệu sẽ được thêm tự động -->
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- FOOTER -->
@@ -114,12 +208,10 @@
         $('#student-id').text(userData.studentID || '...');
         $('#student-class').text(userData.class || '...');
         $('#student-course').text(userData.course || '...');
-        $('#student-dob').text(userData.dob || '...');
         $('#student-email').text(userData.email || '...');
         $('#student-phone').text(userData.phone || '...');
         $('#student-address').text(userData.address || '...');
       }
-
     });
   </script>
 

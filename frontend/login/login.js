@@ -6,27 +6,33 @@ document.addEventListener('DOMContentLoaded', () => {
   btn.addEventListener('click', async e => {
     e.preventDefault();
 
-    const student_code = document
+    const code = document
       .getElementById('inline-username')
       .value.trim();
     const password = document
       .getElementById('inline-password')
       .value;
 
-    if (!student_code || !password) {
-      return alert('Vui lòng nhập MSSV và mật khẩu');
+    if (!code || !password) {
+      return alert('Vui lòng nhập mã số và mật khẩu');
+    }
+
+    // Validate code format (12 digits)
+    if (!/^\d{12}$/.test(code)) {
+      return alert('Mã số phải có đúng 12 chữ số');
     }
 
     try {
-      const res = await fetch('http://localhost:8000/api/user/login/', {
+      const res = await fetch('http://localhost:8000/api/users/login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ student_code, password })
+        body: JSON.stringify({ code, password })
       });
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        return alert(err.detail || 'Đăng nhập thất bại');
+        const errorMessage = err.non_field_errors ? err.non_field_errors[0] : (err.detail || 'Đăng nhập thất bại');
+        return alert(errorMessage);
       }
 
       const { access, refresh, role } = await res.json();

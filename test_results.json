@@ -1,0 +1,78 @@
+[
+  {
+    "test": "Server Connection",
+    "success": true,
+    "message": "Server đang chạy (Status: 200)",
+    "timestamp": "2025-07-12T14:42:26.929043",
+    "data": null
+  },
+  {
+    "test": "Admin Login",
+    "success": true,
+    "message": "Đăng nhập admin thành công",
+    "timestamp": "2025-07-12T14:42:29.579070",
+    "data": {
+      "role": "admin",
+      "access_token": "eyJhbGciOiJIUzI1NiIs..."
+    }
+  },
+  {
+    "test": "Register Teacher",
+    "success": false,
+    "message": "Đăng ký thất bại: Unknown error",
+    "timestamp": "2025-07-12T14:42:32.255820",
+    "data": null
+  },
+  {
+    "test": "Register Student",
+    "success": false,
+    "message": "Đăng ký thất bại: Unknown error",
+    "timestamp": "2025-07-12T14:42:34.837720",
+    "data": null
+  },
+  {
+    "test": "Create Subject",
+    "success": true,
+    "message": "Tạo môn học thành công",
+    "timestamp": "2025-07-12T14:42:36.896188",
+    "data": {
+      "subject_name": "Lập trình Python",
+      "subject_code": "CS101"
+    }
+  },
+  {
+    "test": "Get Subjects",
+    "success": true,
+    "message": "Lấy danh sách môn học thành công (1 môn học)",
+    "timestamp": "2025-07-12T14:42:38.938070",
+    "data": {
+      "count": 1,
+      "subjects": [
+        "Lập trình Python"
+      ]
+    }
+  },
+  {
+    "test": "Get Attendance Log",
+    "success": true,
+    "message": "Lấy log điểm danh thành công",
+    "timestamp": "2025-07-12T14:42:41.011195",
+    "data": {
+      "total_records": 0,
+      "present_count": 0,
+      "absent_count": 0,
+      "present_rate": "0%",
+      "role": "admin"
+    }
+  },
+  {
+    "test": "Get Students",
+    "success": true,
+    "message": "Lấy danh sách sinh viên thành công (0 sinh viên)",
+    "timestamp": "2025-07-12T14:42:43.063043",
+    "data": {
+      "count": 0,
+      "students": []
+    }
+  }
+]
