@@ -1,99 +1,209 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Log - Admin Dashboard</title>
+    <title>Attendance Log - Hệ thống điểm danh khuôn mặt</title>
     <link rel="stylesheet" href="admin.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
-    <div class="container">
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
+    <nav class="navbar">
+        <ul>
+            <li><a href="overview.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="students.html"><i class="fas fa-user-graduate"></i> Sinh viên</a></li>
+            <li><a href="teachers.html"><i class="fas fa-chalkboard-teacher"></i> Giảng viên</a></li>
+            <li><a href="subjects.html"><i class="fas fa-book"></i> Môn học</a></li>
+            <li><a href="teacher_subjects.html"><i class="fas fa-link"></i> Môn giảng dạy</a></li>
+            <li><a href="student_subjects.html"><i class="fas fa-user-plus"></i> Đăng ký môn học</a></li>
+            <li><a href="attendance_log.html" class="active"><i class="fas fa-clipboard-check"></i> Điểm danh</a></li>
+            <li><a href="../login/login.html"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-container">
+        <!-- Attendance Log Section -->
+        <div class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-clipboard-check"></i>
+                    Nhật ký điểm danh
+                </h2>
+                <button class="btn btn-success" id="exportBtn">
+                    <i class="fas fa-download"></i> Xuất dữ liệu
+                </button>
             </div>
-            <ul class="nav-links">
-                <li><a href="overview.html"><i class="fas fa-chart-line"></i> Overview</a></li>
-                <li><a href="students.html"><i class="fas fa-user-graduate"></i> Students</a></li>
-                <li><a href="teachers.html"><i class="fas fa-chalkboard-teacher"></i> Teachers</a></li>
-                <li><a href="attendance_log.html" class="active"><i class="fas fa-history"></i> Attendance Log</a></li>
-                <li><a href="../login/login.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
-        </nav>
 
-        <main class="main-content">
-            <header class="header">
-                <h1><i class="fas fa-history"></i> Attendance Log</h1>
-                <div class="user-info">
-                    <span id="adminName">Admin</span>
-                    <i class="fas fa-user-circle"></i>
-                </div>
-            </header>
+            <!-- Error message for debugging -->
+            <div id="errorMessage" style="color: red; margin: 10px 0; display: none;"></div>
 
-            <div class="content">
-                <div class="filters">
-                    <div class="filter-group">
-                        <label for="dateFilter">Date:</label>
-                        <input type="date" id="dateFilter">
-                    </div>
-                    <div class="filter-group">
-                        <label for="subjectFilter">Subject:</label>
-                        <select id="subjectFilter">
-                            <option value="">All Subjects</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="studentFilter">Student:</label>
-                        <select id="studentFilter">
-                            <option value="">All Students</option>
-                        </select>
-                    </div>
-                    <button id="filterBtn" class="btn btn-primary">
-                        <i class="fas fa-filter"></i> Filter
-                    </button>
-                    <button id="exportBtn" class="btn btn-success">
-                        <i class="fas fa-download"></i> Export
-                    </button>
+            <!-- Filters -->
+            <div class="search-container">
+                <div class="filter-group">
+                    <label for="dateFilter">Ngày:</label>
+                    <input type="date" id="dateFilter" class="form-input">
                 </div>
-
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Student</th>
-                                <th>Subject</th>
-                                <th>Teacher</th>
-                                <th>Status</th>
-                                <th>Confidence</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="attendanceTableBody">
-                            <!-- Data will be loaded here -->
-                        </tbody>
-                    </table>
+                <div class="filter-group">
+                    <label for="subjectFilter">Môn học:</label>
+                    <select id="subjectFilter" class="filter-select">
+                        <option value="">Tất cả môn học</option>
+                    </select>
                 </div>
-
-                <div class="pagination">
-                    <button id="prevPage" class="btn btn-secondary">
-                        <i class="fas fa-chevron-left"></i> Previous
-                    </button>
-                    <span id="pageInfo">Page 1 of 1</span>
-                    <button id="nextPage" class="btn btn-secondary">
-                        Next <i class="fas fa-chevron-right"></i>
-                    </button>
+                <div class="filter-group">
+                    <label for="studentFilter">Sinh viên:</label>
+                    <select id="studentFilter" class="filter-select">
+                        <option value="">Tất cả sinh viên</option>
+                    </select>
                 </div>
+                <button id="filterBtn" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Lọc
+                </button>
             </div>
-        </main>
+
+            <!-- Data Table -->
+            <div class="table-container">
+                <table class="data-table" id="attendanceTable">
+                    <thead>
+                        <tr>
+                            <th>Ngày</th>
+                            <th>Thời gian</th>
+                            <th>Sinh viên</th>
+                            <th>Môn học</th>
+                            <th>Giảng viên</th>
+                            <th>Trạng thái</th>
+                            <th>Độ chính xác</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 20px;">
+                                <i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination"
+                style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px;">
+                <button id="prevPage" class="btn btn-secondary" disabled>
+                    <i class="fas fa-chevron-left"></i> Trước
+                </button>
+                <span id="pageInfo" style="margin: 0 15px; font-weight: bold;">Trang 1 của 1</span>
+                <button id="nextPage" class="btn btn-secondary" disabled>
+                    Sau <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
-    <script src="../jquery-3.7.1.min.js"></script>
-    <script src="attendance_log.js"></script>
+    <!-- Loading jQuery from local file -->
+    <script src="../shared/js/jquery-3.7.1.min.js"></script>
+    <script src="attendance_log.js?v=20250718"></script>
+
+    <style>
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            margin-right: 20px;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: end;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .data-table th {
+            background-color: #6c7ae0;
+            color: white;
+            font-weight: bold;
+        }
+
+        .data-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-present {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-absent {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .status-late {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+            margin: 0 2px;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+        }
+
+        #errorMessage {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
 </body>
 
 </html>

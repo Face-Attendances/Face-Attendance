@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loadStudents();
     setupEventListeners();
     loadClasses();
+    updateStatistics();
 });
 
 // Setup event listeners
@@ -42,6 +43,7 @@ async function loadStudents() {
             students = data;
             displayStudents(students);
             updateClassFilter();
+            updateStatistics();
         } else {
             showToast('Lỗi khi tải danh sách sinh viên', 'error');
         }
@@ -51,35 +53,62 @@ async function loadStudents() {
     }
 }
 
+// Update statistics
+function updateStatistics() {
+    const totalStudents = students.length;
+    const activeStudents = students.filter(s => s.is_active !== false).length;
+    const uniqueClasses = [...new Set(students.map(s => s.student_class).filter(Boolean))].length;
+    const newStudents = students.filter(s => {
+        const createdDate = new Date(s.created_at || Date.now());
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        return createdDate > oneMonthAgo;
+    }).length;
+
+    document.getElementById('totalStudents').textContent = totalStudents;
+    document.getElementById('activeStudents').textContent = activeStudents;
+    document.getElementById('totalClasses').textContent = uniqueClasses;
+    document.getElementById('newStudents').textContent = newStudents;
+}
+
 // Display students in table
 function displayStudents(studentsToShow) {
     const tbody = document.getElementById('studentsTable');
     tbody.innerHTML = '';
 
     if (studentsToShow.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Không có sinh viên nào</td></tr>';
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 40px; color: #718096;">
+                    <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 16px; display: block; color: #a0aec0;"></i>
+                    Không tìm thấy sinh viên nào
+                </td>
+            </tr>
+        `;
         return;
     }
 
     studentsToShow.forEach(student => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${student.student_code}</td>
-            <td>${student.name}</td>
-            <td>${student.student_class}</td>
+            <td><span class="student-code">${student.student_code}</span></td>
+            <td><span class="student-name">${student.name}</span></td>
+            <td><span class="student-class">${student.student_class}</span></td>
             <td>${student.email || '-'}</td>
             <td>${student.phone_number || '-'}</td>
             <td><span class="status-badge status-active">Hoạt động</span></td>
             <td>
-                <button class="btn btn-warning btn-sm" onclick="editStudent(${student.id})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-danger btn-sm" onclick="deleteStudent(${student.id}, '${student.name}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-                <button class="btn btn-success btn-sm" onclick="viewStudentDetails(${student.id})">
-                    <i class="fas fa-eye"></i>
-                </button>
+                <div class="table-actions">
+                    <button class="btn btn-warning btn-icon" onclick="editStudent(${student.id})" title="Chỉnh sửa">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-icon" onclick="deleteStudent(${student.id}, '${student.name}')" title="Xóa">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="btn btn-success btn-icon" onclick="viewStudentDetails(${student.id})" title="Xem chi tiết">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
             </td>
         `;
         tbody.appendChild(row);
@@ -130,6 +159,7 @@ function loadClasses() {
 async function handleStudentSubmit(event) {
     event.preventDefault();
 
+    const token = localStorage.getItem('accessToken'); // Lấy token
     const formData = new FormData(event.target);
     const studentData = {
         student_code: formData.get('student_code'),
@@ -142,16 +172,25 @@ async function handleStudentSubmit(event) {
     };
 
     try {
-        const url = isEditMode
-            ? `${API_BASE_URL}/database/students/${currentStudentId}/update/`
-            : `${API_BASE_URL}/database/students/create/`;
+        let url, method;
+        if (isEditMode) {
+            const student = students.find(s => s.id === currentStudentId);
+            if (!student) {
+                showToast('Không tìm thấy sinh viên để cập nhật', 'error');
+                return;
+            }
+            url = `${API_BASE_URL}/database/students/${student.student_code}/update/`;
+            method = 'PUT';
+        } else {
+            url = `${API_BASE_URL}/database/students/create/`;
+            method = 'POST';
+        }
 
-        const method = isEditMode ? 'PUT' : 'POST';
-
-        const response = await window.authHelper.makeAuthenticatedRequest(url, {
+        const response = await fetch(url, {
             method: method,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token // Thêm Authorization header
             },
             body: JSON.stringify(studentData)
         });
@@ -213,21 +252,55 @@ function deleteStudent(studentId, studentName) {
 
 // Confirm delete
 async function confirmDelete() {
+    if (!currentStudentId) {
+        showToast('Không có sinh viên nào được chọn để xóa', 'error');
+        return;
+    }
+
     try {
-        const response = await window.authHelper.makeAuthenticatedRequest(`${API_BASE_URL}/database/students/${currentStudentId}/delete/`, {
-            method: 'DELETE'
+        const token = localStorage.getItem('accessToken'); // Lấy token
+        const student = students.find(s => s.id === currentStudentId);
+        if (!student) {
+            showToast('Không tìm thấy sinh viên để xóa', 'error');
+            return;
+        }
+        console.log('🗑️ Deleting student ID:', currentStudentId);
+
+        const response = await fetch(`${API_BASE_URL}/database/students/${student.student_code}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token // Thêm Authorization header
+            }
         });
 
-        if (response && response.ok) {
-            showToast('Xóa sinh viên thành công!', 'success');
-            closeModal('deleteModal');
-            loadStudents();
+        console.log('Delete response status:', response.status);
+        console.log('Delete response ok:', response.ok);
+
+        if (response.ok) {
+            // Handle both 200 and 204 status codes as success
+            if (response.status === 204 || response.status === 200) {
+                showToast('Xóa sinh viên thành công!', 'success');
+                closeModal('deleteModal');
+                currentStudentId = null; // Reset
+                await loadStudents(); // Reload data
+            } else {
+                const errorData = await response.json();
+                showToast('Lỗi khi xóa: ' + (errorData.message || 'Unknown error'), 'error');
+            }
         } else {
-            showToast('Lỗi khi xóa sinh viên', 'error');
+            let errorMessage = 'Lỗi khi xóa sinh viên';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorData.error || errorMessage;
+            } catch (e) {
+                console.log('Could not parse error response');
+            }
+            showToast(errorMessage, 'error');
         }
     } catch (error) {
-        console.error('Error deleting student:', error);
-        showToast('Lỗi khi xóa sinh viên', 'error');
+        console.error('Network error deleting student:', error);
+        showToast('Lỗi kết nối khi xóa sinh viên: ' + error.message, 'error');
     }
 }
 
@@ -236,8 +309,59 @@ function viewStudentDetails(studentId) {
     const student = students.find(s => s.id === studentId);
     if (!student) return;
 
-    // You can implement a detailed view modal here
-    alert(`Chi tiết sinh viên:\nMã SV: ${student.student_code}\nTên: ${student.name}\nLớp: ${student.student_class}\nEmail: ${student.email || 'N/A'}\nSĐT: ${student.phone_number || 'N/A'}`);
+    // Create a detailed modal for student information
+    const modalContent = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Chi tiết sinh viên</h3>
+                <span class="close" onclick="closeModal('detailsModal')">&times;</span>
+            </div>
+            <div style="padding: 24px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                    <div>
+                        <label style="font-weight: 600; color: #718096; font-size: 0.875rem;">Mã sinh viên</label>
+                        <p style="margin: 8px 0; font-size: 1.125rem; color: #2d3748;">${student.student_code}</p>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #718096; font-size: 0.875rem;">Họ và tên</label>
+                        <p style="margin: 8px 0; font-size: 1.125rem; color: #2d3748;">${student.name}</p>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #718096; font-size: 0.875rem;">Lớp</label>
+                        <p style="margin: 8px 0; font-size: 1.125rem; color: #2d3748;">${student.student_class || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #718096; font-size: 0.875rem;">Ngày sinh</label>
+                        <p style="margin: 8px 0; font-size: 1.125rem; color: #2d3748;">${student.dayofbirth || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #718096; font-size: 0.875rem;">Email</label>
+                        <p style="margin: 8px 0; font-size: 1.125rem; color: #2d3748;">${student.email || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; color: #718096; font-size: 0.875rem;">Số điện thoại</label>
+                        <p style="margin: 8px 0; font-size: 1.125rem; color: #2d3748;">${student.phone_number || 'N/A'}</p>
+                    </div>
+                </div>
+                <div>
+                    <label style="font-weight: 600; color: #718096; font-size: 0.875rem;">Địa chỉ</label>
+                    <p style="margin: 8px 0; font-size: 1.125rem; color: #2d3748;">${student.address || 'N/A'}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('detailsModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'detailsModal';
+        modal.className = 'modal';
+        document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = modalContent;
+    modal.style.display = 'block';
 }
 
 // Export students to Excel

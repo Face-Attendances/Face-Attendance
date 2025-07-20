@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý sinh viên - Hệ thống điểm danh khuôn mặt</title>
+    <link rel="stylesheet" href="teacher.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .student-management-page {
+            max-width: 1400px;
+            margin: 24px auto;
+            padding: 0 24px;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .filters-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-weight: 500;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+        }
+
+        .filter-input {
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(113, 128, 150, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .students-table {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .table-content {
+            overflow-x: auto;
+        }
+
+        .students-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .students-table th {
+            background: #f7fafc;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.875rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .students-table td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #f7fafc;
+            font-size: 0.875rem;
+        }
+
+        .students-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .attendance-rate {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .rate-excellent {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .rate-good {
+            background: #fef5e7;
+            color: #744210;
+        }
+
+        .rate-poor {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #718096;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+            color: #4a5568;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+        }
+
+        .stats-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .student-management-page {
+                padding: 0 16px;
+            }
+
+            .page-header {
+                padding: 24px;
+            }
+
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .students-table {
+                font-size: 0.75rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .table-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-left">
+            <img src="../assets/images/logo.png" alt="Logo UTH">
+            <h1 class="header-title">Quản lý sinh viên</h1>
+        </div>
+        <div class="user-options">
+            <span id="currentDateTime"></span>
+            <div class="dropdown">
+                <button id="userMenuBtn">
+                    <i class="fas fa-user-tie"></i>
+                    <span id="userName">Giảng viên</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="dropdown-content" id="userMenu">
+                    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="my-subjects.html"><i class="fas fa-book"></i> Môn học của tôi</a>
+                    <a href="attendance-log.html"><i class="fas fa-clipboard-list"></i> Nhật ký điểm danh</a>
+                    <a href="change-password.html"><i class="fas fa-key"></i> Đổi mật khẩu</a>
+                    <a href="../login/login.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="student-management-page">
+        <!-- Alert Messages -->
+        <div id="alertContainer"></div>
+
+        <div class="page-header">
+            <h1><i class="fas fa-users"></i> Quản lý sinh viên</h1>
+            <p>Quản lý danh sách sinh viên trong các môn học</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalStudents">0</div>
+                    <div class="stat-label">Tổng sinh viên</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="excellentStudents">0</div>
+                    <div class="stat-label">Xuất sắc (90%+)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="goodStudents">0</div>
+                    <div class="stat-label">Tốt (70-89%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="poorStudents">0</div>
+                    <div class="stat-label">Cần cải thiện (<70%)< /div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="avgAttendance">0%</div>
+                        <div class="stat-label">Tỷ lệ có mặt TB</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-section">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Môn học</label>
+                        <select class="filter-input" id="subjectFilter">
+                            <option value="">Tất cả môn học</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Tìm kiếm sinh viên</label>
+                        <input type="text" class="filter-input" id="studentSearch"
+                            placeholder="Tên hoặc mã số sinh viên...">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Tỷ lệ điểm danh</label>
+                        <select class="filter-input" id="attendanceFilter">
+                            <option value="">Tất cả</option>
+                            <option value="excellent">Xuất sắc (90%+)</option>
+                            <option value="good">Tốt (70-89%)</option>
+                            <option value="poor">Cần cải thiện (<70%)< /option>
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" onclick="applyFilters()">
+                            <i class="fas fa-filter"></i> Lọc
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearFilters()">
+                            <i class="fas fa-times"></i> Xóa lọc
+                        </button>
+                        <button class="btn btn-success" onclick="exportData()">
+                            <i class="fas fa-download"></i> Xuất Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students Table -->
+            <div class="students-table">
+                <div class="table-header">
+                    <h2 class="table-title">
+                        <i class="fas fa-table"></i>
+                        Danh sách sinh viên
+                    </h2>
+                    <div class="table-actions">
+                        <button class="btn btn-primary" onclick="addStudent()">
+                            <i class="fas fa-plus"></i> Thêm sinh viên
+                        </button>
+                    </div>
+                </div>
+                <div class="table-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sinh viên</th>
+                                <th>Mã số</th>
+                                <th>Lớp</th>
+                                <th>Môn học</th>
+                                <th>Tỷ lệ điểm danh</th>
+                                <th>Số lần vắng</th>
+                                <th>Ghi chú</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Hệ thống điểm danh khuôn mặt. All rights reserved.</p>
+            <p>Được phát triển bởi UTH Team</p>
+        </div>
+    </footer>
+
+    <script src="../shared/js/jquery-3.7.1.min.js"></script>
+    <script src="teacher.js"></script>
+    <script>
+        // Global variables
+        let filteredStudents = [];
+        let subjects = [];
+
+        // API endpoints (using the ones from teacher.js)
+        const STUDENTS_API = `${API_BASE_URL}/database/teacher/students/`;
+        const TEACHING_SUBJECTS_API = `${API_BASE_URL}/database/teacher-subjects/teaching/`;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function () {
+            checkAuthentication();
+            loadStudents();
+            loadSubjects();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
+
+        // Authentication check
+        async function checkAuthentication() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = '../login/login.html';
+                return;
+            }
+        }
+
+        // Load students
+        async function loadStudents() {
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) return;
+
+                const response = await fetch(STUDENTS_API, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+
+                    // Handle the API response format: {success: true, data: [...]}
+                    let students = [];
+                    if (result.success && result.data) {
+                        students = result.data;
+                    } else if (Array.isArray(result)) {
+                        students = result;
+                    }
+
+                    window.students = students; // Make it global
+                    filteredStudents = [...students];
+                    displayStudents();
+                    updateStatistics();
+                } else {
+                    showToast('Lỗi khi tải danh sách sinh viên', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading students:', error);
+                showToast('Lỗi khi tải danh sách sinh viên', 'error');
+            }
+        }
+
+        // Load subjects for filter
+        async function loadSubjects() {
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) return;
+
+                const response = await fetch(TEACHING_SUBJECTS_API, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    subjects = await response.json();
+                    const subjectFilter = document.getElementById('subjectFilter');
+
+                    subjects.forEach(subject => {
+                        const option = document.createElement('option');
+                        option.value = subject.id;
+                        option.textContent = `${subject.subject_code} - ${subject.subject_name}`;
+                        subjectFilter.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+            }
+        }
+
+        // Display students
+        function displayStudents() {
+            const tbody = document.getElementById('studentsTableBody');
+
+            if (filteredStudents.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="fas fa-users"></i>
+                                <h3>Không có dữ liệu</h3>
+                                <p>Chưa có sinh viên nào trong danh sách</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filteredStudents.map(student => {
+                const attendanceRate = student.attendance_rate || 0;
+                const rateClass = attendanceRate >= 90 ? 'excellent' :
+                    attendanceRate >= 70 ? 'good' : 'poor';
+                const rateText = attendanceRate >= 90 ? 'Xuất sắc' :
+                    attendanceRate >= 70 ? 'Tốt' : 'Cần cải thiện';
+
+                const studentName = student.full_name || student.student_name || 'Unknown';
+                const studentCode = student.student_code || 'Unknown';
+                const initials = studentName.split(' ').map(n => n[0]).join('').toUpperCase();
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="student-avatar">${initials}</div>
+                                <span>${studentName}</span>
+                            </div>
+                        </td>
+                        <td>${studentCode}</td>
+                        <td>${student.student_class || 'Unknown'}</td>
+                        <td>${student.subject_name || 'Unknown'}</td>
+                        <td>
+                            <span class="attendance-rate rate-${rateClass}">${attendanceRate}% - ${rateText}</span>
+                        </td>
+                        <td>${student.absent_count || 0}</td>
+                        <td>${student.notes || '-'}</td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="viewDetails(${student.id})" style="padding: 4px 8px; font-size: 0.75rem;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const students = window.students || [];
+            const total = students.length;
+            const excellent = students.filter(s => (s.attendance_rate || 0) >= 90).length;
+            const good = students.filter(s => (s.attendance_rate || 0) >= 70 && (s.attendance_rate || 0) < 90).length;
+            const poor = students.filter(s => (s.attendance_rate || 0) < 70).length;
+            const avgAttendance = total > 0 ? Math.round(students.reduce((sum, s) => sum + (s.attendance_rate || 0), 0) / total) : 0;
+
+            document.getElementById('totalStudents').textContent = total;
+            document.getElementById('excellentStudents').textContent = excellent;
+            document.getElementById('goodStudents').textContent = good;
+            document.getElementById('poorStudents').textContent = poor;
+            document.getElementById('avgAttendance').textContent = avgAttendance + '%';
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const students = window.students || [];
+            const subjectFilter = document.getElementById('subjectFilter').value;
+            const studentSearch = document.getElementById('studentSearch').value.toLowerCase();
+            const attendanceFilter = document.getElementById('attendanceFilter').value;
+
+            filteredStudents = students.filter(student => {
+                const studentName = (student.full_name || student.student_name || '').toLowerCase();
+                const studentCode = (student.student_code || '').toLowerCase();
+                const attendanceRate = student.attendance_rate || 0;
+
+                // Subject filter
+                if (subjectFilter && student.subject_id != subjectFilter) {
+                    return false;
+                }
+
+                // Student search
+                if (studentSearch && !studentName.includes(studentSearch) && !studentCode.includes(studentSearch)) {
+                    return false;
+                }
+
+                // Attendance filter
+                if (attendanceFilter) {
+                    if (attendanceFilter === 'excellent' && attendanceRate < 90) return false;
+                    if (attendanceFilter === 'good' && (attendanceRate < 70 || attendanceRate >= 90)) return false;
+                    if (attendanceFilter === 'poor' && attendanceRate >= 70) return false;
+                }
+
+                return true;
+            });
+
+            displayStudents();
+        }
+
+        // Clear filters
+        function clearFilters() {
+            const students = window.students || [];
+            document.getElementById('subjectFilter').value = '';
+            document.getElementById('studentSearch').value = '';
+            document.getElementById('attendanceFilter').value = '';
+
+            filteredStudents = [...students];
+            displayStudents();
+        }
+
+        // Add student
+        function addStudent() {
+            showToast('Chức năng thêm sinh viên đang được phát triển', 'info');
+        }
+
+        // View student details
+        function viewDetails(studentId) {
+            showToast('Chức năng xem chi tiết đang được phát triển', 'info');
+        }
+
+        // Export data
+        function exportData() {
+            showToast('Chức năng xuất Excel đang được phát triển', 'info');
+        }
+
+        // Update date time
+        function updateDateTime() {
+            const now = new Date();
+            const dateTimeElement = document.getElementById('currentDateTime');
+
+            if (dateTimeElement) {
+                const formatted = now.toLocaleString('vi-VN', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+
+                dateTimeElement.textContent = `🕒 ${formatted}`;
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            if (!alertContainer) return;
+
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+
+            alertContainer.appendChild(toast);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            window.location.href = '../login/login.html';
+        }
+    </script>
+</body>
+
+</html>

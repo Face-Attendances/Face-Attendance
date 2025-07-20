@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý môn giảng dạy - Hệ thống điểm danh khuôn mặt</title>
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="overview.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="students.html"><i class="fas fa-user-graduate"></i> Sinh viên</a></li>
+            <li><a href="teachers.html"><i class="fas fa-chalkboard-teacher"></i> Giảng viên</a></li>
+            <li><a href="subjects.html"><i class="fas fa-book"></i> Môn học</a></li>
+            <li><a href="teacher_subjects.html" class="active"><i class="fas fa-link"></i> Môn giảng dạy</a></li>
+            <li><a href="student_subjects.html"><i class="fas fa-user-plus"></i> Đăng ký môn học</a></li>
+            <li><a href="attendance_log.html"><i class="fas fa-clipboard-check"></i> Điểm danh</a></li>
+            <li><a href="../login/login.html"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-container">
+        <div class="content-header">
+            <h1><i class="fas fa-link"></i> Quản lý môn giảng dạy</h1>
+            <button class="btn btn-primary" onclick="addNewTeacherSubject()">
+                <i class="fas fa-plus"></i> Thêm môn giảng dạy
+            </button>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="search-container">
+            <input type="text" class="search-box" id="searchTeacherSubject"
+                placeholder="Tìm kiếm theo giảng viên, môn học...">
+            <select class="filter-select" id="teacherFilter">
+                <option value="">Tất cả giảng viên</option>
+            </select>
+            <select class="filter-select" id="subjectFilter">
+                <option value="">Tất cả môn học</option>
+            </select>
+            <button class="btn btn-secondary" onclick="clearFilters()">
+                <i class="fas fa-times"></i> Xóa bộ lọc
+            </button>
+        </div>
+
+        <!-- Teacher Subjects Table -->
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Giảng viên</th>
+                        <th>Mã giảng viên</th>
+                        <th>Môn học</th>
+                        <th>Mã môn</th>
+                        <th>Học kỳ</th>
+                        <th>Năm học</th>
+                        <th>Số sinh viên</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="teacherSubjectsTable">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Teacher Subject Modal -->
+    <div id="teacherSubjectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="teacherSubjectModalTitle">Thêm môn giảng dạy mới</h2>
+                <span class="close" onclick="closeModal('teacherSubjectModal')">&times;</span>
+            </div>
+            <form id="teacherSubjectForm">
+                <input type="hidden" id="teacherSubjectId" name="id">
+                <div class="form-group">
+                    <label class="form-label">Giảng viên *</label>
+                    <select class="form-input" name="teacher" id="teacherSelect" required>
+                        <option value="">-- Chọn giảng viên --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Môn học *</label>
+                    <select class="form-input" name="subject" id="subjectSelect" required>
+                        <option value="">-- Chọn môn học --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Học kỳ</label>
+                    <input type="text" class="form-input" name="semester" id="semester" placeholder="VD: 2024-1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Năm học</label>
+                    <input type="text" class="form-input" name="academic_year" id="academicYear"
+                        placeholder="VD: 2024-2025">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="teacherSubjectSubmitBtn">
+                        <i class="fas fa-save"></i> Thêm môn giảng dạy
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('teacherSubjectModal')">
+                        <i class="fas fa-times"></i> Hủy
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Xác nhận xóa</h2>
+                <span class="close" onclick="closeModal('deleteModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa môn giảng dạy này?</p>
+                <p><strong id="deleteTeacherSubjectName"></strong></p>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i> Xóa
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('deleteModal')">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="teacher_subjects.js"></script>
+    <script src="auth_check.js"></script>
+</body>
+
+</html>

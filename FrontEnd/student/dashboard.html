@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Sinh viên - Hệ thống điểm danh khuôn mặt</title>
+    <link rel="stylesheet" href="student.css">
+    <link rel="stylesheet" href="../shared/shared.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-left">
+            <img src="../assets/images/logo.png" alt="Logo UTH">
+            <h1 class="header-title">Dashboard Sinh viên</h1>
+        </div>
+        <div class="user-options">
+            <span id="currentDateTime"></span>
+            <div class="dropdown">
+                <button id="userMenuBtn">
+                    <i class="fas fa-user"></i>
+                    <span id="userName">Sinh viên</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="dropdown-content" id="userMenu">
+                    <a href="profile.html"><i class="fas fa-user-edit"></i> Thông tin cá nhân</a>
+                    <a href="course-registration.html"><i class="fas fa-book"></i> Đăng ký môn học</a>
+                    <a href="attendance-history.html"><i class="fas fa-history"></i> Lịch sử điểm danh</a>
+                    <a href="change-password.html"><i class="fas fa-key"></i> Đổi mật khẩu</a>
+                    <a href="../login/login.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-card">
+                <div class="welcome-avatar">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="welcome-content">
+                    <h2>Chào mừng, <span id="studentName">Sinh viên</span>!</h2>
+                    <p>Hôm nay bạn có <span id="todayClasses">0</span> lớp học cần điểm danh</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="totalAttendance">0</div>
+                    <div class="stat-label">Tổng lần điểm danh</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="registeredSubjects">0</div>
+                    <div class="stat-label">Môn học đã đăng ký</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="attendanceRate">0%</div>
+                    <div class="stat-label">Tỷ lệ có mặt</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="lateCount">0</div>
+                    <div class="stat-label">Lần đi muộn</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Actions Grid -->
+        <div class="main-grid">
+            <!-- Subject Selection Section -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon attendance">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">Chọn môn học</div>
+                        <div class="card-subtitle">Chọn môn học để điểm danh</div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="form-group">
+                        <label class="form-label">Môn học</label>
+                        <select class="form-input" id="subjectSelect">
+                            <option value="">-- Chọn môn học --</option>
+                        </select>
+                    </div>
+                    <div id="selectedSubjectInfo" style="display: none;">
+                        <div class="subject-info">
+                            <p><strong>Giảng viên:</strong> <span id="teacherName">-</span></p>
+                            <p><strong>Thời gian:</strong> <span id="classTime">-</span></p>
+                            <p><strong>Phòng học:</strong> <span id="classroom">-</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Face Recognition Section -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon webcam">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">Điểm danh khuôn mặt</div>
+                        <div class="card-subtitle">Sử dụng camera để điểm danh</div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="webcam-container">
+                        <video id="video" autoplay muted></video>
+                        <div class="webcam-controls">
+                            <button class="btn btn-primary" id="startCameraBtn">
+                                <i class="fas fa-play"></i> Bắt đầu camera
+                            </button>
+                            <button class="btn btn-success" id="startAttendanceBtn" disabled>
+                                <i class="fas fa-check"></i> Điểm danh
+                            </button>
+                            <button class="btn btn-danger" id="stopCameraBtn" disabled>
+                                <i class="fas fa-stop"></i> Dừng camera
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon profile">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">Hoạt động gần đây</div>
+                        <div class="card-subtitle">Lịch sử điểm danh</div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div id="recentActivity">
+                        <div class="activity-item">
+                            <div class="activity-icon success">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Điểm danh thành công</div>
+                                <div class="activity-desc">Môn học: Lập trình Web - 08:00</div>
+                                <div class="activity-time">Hôm nay</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon warning">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Điểm danh muộn</div>
+                                <div class="activity-desc">Môn học: Cơ sở dữ liệu - 14:00</div>
+                                <div class="activity-time">Hôm qua</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Hệ thống điểm danh khuôn mặt. All rights reserved.</p>
+            <p>Được phát triển bởi UTH Team</p>
+        </div>
+    </footer>
+
+    <!-- Alert Messages -->
+    <div id="alertContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Đang xử lý...</p>
+    </div>
+
+    <script src="../shared/js/jquery-3.7.1.min.js"></script>
+    <script src="student.js"></script>
+</body>
+
+</html>

@@ -16,6 +16,8 @@
             <li><a href="students.html"><i class="fas fa-user-graduate"></i> Sinh viên</a></li>
             <li><a href="teachers.html" class="active"><i class="fas fa-chalkboard-teacher"></i> Giảng viên</a></li>
             <li><a href="subjects.html"><i class="fas fa-book"></i> Môn học</a></li>
+            <li><a href="teacher_subjects.html"><i class="fas fa-link"></i> Môn giảng dạy</a></li>
+            <li><a href="student_subjects.html"><i class="fas fa-user-plus"></i> Đăng ký môn học</a></li>
             <li><a href="attendance_log.html"><i class="fas fa-clipboard-check"></i> Điểm danh</a></li>
             <li><a href="../login/login.html"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
         </ul>
@@ -25,7 +27,7 @@
         <div class="content-section">
             <div class="section-header">
                 <h2 class="section-title">Quản lý giảng viên</h2>
-                <button class="btn btn-primary" onclick="openModal('addTeacherModal')">
+                <button class="btn btn-primary" onclick="addNewTeacher()">
                     <i class="fas fa-plus"></i> Thêm giảng viên
                 </button>
             </div>
@@ -124,7 +126,8 @@
         </div>
     </div>
 
-    <script src="teachers.js"></script>
+    <script src="auth_check.js"></script>
+    <script src="teachers.js?v=20250718b"></script>
 </body>
 
 </html>

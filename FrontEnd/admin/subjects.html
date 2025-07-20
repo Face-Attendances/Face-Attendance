@@ -16,6 +16,8 @@
             <li><a href="students.html"><i class="fas fa-user-graduate"></i> Sinh viên</a></li>
             <li><a href="teachers.html"><i class="fas fa-chalkboard-teacher"></i> Giảng viên</a></li>
             <li><a href="subjects.html" class="active"><i class="fas fa-book"></i> Môn học</a></li>
+            <li><a href="teacher_subjects.html"><i class="fas fa-link"></i> Môn giảng dạy</a></li>
+            <li><a href="student_subjects.html"><i class="fas fa-user-plus"></i> Đăng ký môn học</a></li>
             <li><a href="attendance_log.html"><i class="fas fa-clipboard-check"></i> Điểm danh</a></li>
             <li><a href="../login/login.html"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
         </ul>
@@ -33,9 +35,6 @@
             <div class="search-container">
                 <input type="text" class="search-box" id="searchSubject"
                     placeholder="Tìm kiếm theo mã môn học, tên môn học...">
-                <select class="filter-select" id="filterTeacher">
-                    <option value="">Tất cả giảng viên</option>
-                </select>
                 <button class="btn btn-success" onclick="exportSubjects()">
                     <i class="fas fa-download"></i> Xuất Excel
                 </button>
@@ -46,10 +45,8 @@
                     <tr>
                         <th>Mã môn học</th>
                         <th>Tên môn học</th>
-                        <th>Giảng viên</th>
-                        <th>Thời gian</th>
-                        <th>Phòng học</th>
                         <th>Số tín chỉ</th>
+                        <th>Mô tả</th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>
@@ -75,22 +72,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Tên môn học *</label>
-                    <input type="text" class="form-input" name="name" id="subjectName" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Giảng viên *</label>
-                    <select class="form-input" name="teacher" id="subjectTeacher" required>
-                        <option value="">Chọn giảng viên</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Thời gian *</label>
-                    <input type="text" class="form-input" name="time" id="subjectTime"
-                        placeholder="VD: Thứ 2, 7:00-9:00" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Phòng học</label>
-                    <input type="text" class="form-input" name="room" id="subjectRoom">
+                    <input type="text" class="form-input" name="subject_name" id="subjectName" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Số tín chỉ</label>
@@ -126,7 +108,8 @@
         </div>
     </div>
 
-    <script src="subjects.js"></script>
+    <script src="auth_check.js"></script>
+    <script src="subjects.js?v=20250718b"></script>
 </body>
 
 </html>

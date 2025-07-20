@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhật ký điểm danh - Hệ thống điểm danh khuôn mặt</title>
+    <link rel="stylesheet" href="teacher.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .attendance-log-page {
+            max-width: 1400px;
+            margin: 24px auto;
+            padding: 0 24px;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .filters-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-weight: 500;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+        }
+
+        .filter-input {
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(113, 128, 150, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .attendance-table {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .table-content {
+            overflow-x: auto;
+        }
+
+        .attendance-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .attendance-table th {
+            background: #f7fafc;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.875rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .attendance-table td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #f7fafc;
+            font-size: 0.875rem;
+        }
+
+        .attendance-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .status-present {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-late {
+            background: #fef5e7;
+            color: #744210;
+        }
+
+        .status-absent {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #718096;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+            color: #4a5568;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+        }
+
+        .stats-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .student-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .attendance-log-page {
+                padding: 0 16px;
+            }
+
+            .page-header {
+                padding: 24px;
+            }
+
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .attendance-table {
+                font-size: 0.75rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .table-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-left">
+            <img src="../assets/images/logo.png" alt="Logo UTH">
+            <h1 class="header-title">Nhật ký điểm danh</h1>
+        </div>
+        <div class="user-options">
+            <span id="currentDateTime"></span>
+            <div class="dropdown">
+                <button id="userMenuBtn">
+                    <i class="fas fa-user-tie"></i>
+                    <span id="userName">Giảng viên</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="dropdown-content" id="userMenu">
+                    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="my-subjects.html"><i class="fas fa-book"></i> Môn học của tôi</a>
+                    <a href="student-management.html"><i class="fas fa-users"></i> Quản lý sinh viên</a>
+                    <a href="change-password.html"><i class="fas fa-key"></i> Đổi mật khẩu</a>
+                    <a href="../login/login.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="attendance-log-page">
+        <!-- Alert Messages -->
+        <div id="alertContainer"></div>
+
+        <div class="page-header">
+            <h1><i class="fas fa-clipboard-list"></i> Nhật ký điểm danh</h1>
+            <p>Quản lý và theo dõi điểm danh sinh viên</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalStudents">0</div>
+                    <div class="stat-label">Tổng sinh viên</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="presentCount">0</div>
+                    <div class="stat-label">Có mặt</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="lateCount">0</div>
+                    <div class="stat-label">Đi muộn</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="absentCount">0</div>
+                    <div class="stat-label">Vắng mặt</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="attendanceRate">0%</div>
+                    <div class="stat-label">Tỷ lệ có mặt</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Môn học</label>
+                    <select class="filter-input" id="subjectFilter">
+                        <option value="">Tất cả môn học</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Sinh viên</label>
+                    <input type="text" class="filter-input" id="studentFilter" placeholder="Tìm kiếm sinh viên...">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Trạng thái</label>
+                    <select class="filter-input" id="statusFilter">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="present">Có mặt</option>
+                        <option value="late">Đi muộn</option>
+                        <option value="absent">Vắng mặt</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Ngày</label>
+                    <input type="date" class="filter-input" id="dateFilter">
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-primary" onclick="applyFilters()">
+                        <i class="fas fa-filter"></i> Lọc
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearFilters()">
+                        <i class="fas fa-times"></i> Xóa lọc
+                    </button>
+                    <button class="btn btn-success" onclick="exportData()">
+                        <i class="fas fa-download"></i> Xuất Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Table -->
+        <div class="attendance-table">
+            <div class="table-header">
+                <h2 class="table-title">
+                    <i class="fas fa-table"></i>
+                    Danh sách điểm danh
+                </h2>
+                <div class="table-actions">
+                    <button class="btn btn-primary" onclick="startAttendance()">
+                        <i class="fas fa-camera"></i> Bắt đầu điểm danh
+                    </button>
+                </div>
+            </div>
+            <div class="table-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sinh viên</th>
+                            <th>Mã số</th>
+                            <th>Môn học</th>
+                            <th>Ngày</th>
+                            <th>Thời gian</th>
+                            <th>Trạng thái</th>
+                            <th>Ghi chú</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody">
+                        <!-- Data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Hệ thống điểm danh khuôn mặt. All rights reserved.</p>
+            <p>Được phát triển bởi UTH Team</p>
+        </div>
+    </footer>
+
+    <script src="../shared/js/jquery-3.7.1.min.js"></script>
+    <script src="teacher.js"></script>
+    <script>
+        // Global variables
+        let attendanceLog = [];
+        let filteredLog = [];
+        let subjects = [];
+
+        // API endpoints
+        const API_BASE_URL = 'http://localhost:8000/api';
+        const ATTENDANCE_LOG_API = `${API_BASE_URL}/database/attendance/log/`;
+        const TEACHING_SUBJECTS_API = `${API_BASE_URL}/database/teacher/teaching-subjects/`;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function () {
+            checkAuthentication();
+            loadAttendanceLog();
+            loadSubjects();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
+
+        // Authentication check
+        async function checkAuthentication() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = '../login/login.html';
+                return;
+            }
+        }
+
+        // Load attendance log
+        async function loadAttendanceLog() {
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) return;
+
+                const response = await fetch(ATTENDANCE_LOG_API, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    attendanceLog = await response.json();
+                    filteredLog = [...attendanceLog];
+                    displayAttendanceLog();
+                    updateStatistics();
+                } else {
+                    showToast('Lỗi khi tải nhật ký điểm danh', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading attendance log:', error);
+                showToast('Lỗi khi tải nhật ký điểm danh', 'error');
+            }
+        }
+
+        // Load subjects for filter
+        async function loadSubjects() {
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) return;
+
+                const response = await fetch(TEACHING_SUBJECTS_API, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    subjects = await response.json();
+                    const subjectFilter = document.getElementById('subjectFilter');
+
+                    subjects.forEach(subject => {
+                        const option = document.createElement('option');
+                        option.value = subject.id;
+                        option.textContent = `${subject.subject_code} - ${subject.subject_name}`;
+                        subjectFilter.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+            }
+        }
+
+        // Display attendance log
+        function displayAttendanceLog() {
+            const tbody = document.getElementById('attendanceTableBody');
+
+            if (filteredLog.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <h3>Không có dữ liệu</h3>
+                                <p>Chưa có nhật ký điểm danh nào</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filteredLog.map(record => {
+                const date = new Date(record.timestamp);
+                const statusClass = record.status === 'present' ? 'present' :
+                    record.status === 'late' ? 'late' : 'absent';
+                const statusText = record.status === 'present' ? 'Có mặt' :
+                    record.status === 'late' ? 'Đi muộn' : 'Vắng mặt';
+
+                const studentName = record.student_name || 'Unknown';
+                const studentCode = record.student_code || 'Unknown';
+                const initials = studentName.split(' ').map(n => n[0]).join('').toUpperCase();
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="student-avatar">${initials}</div>
+                                <span>${studentName}</span>
+                            </div>
+                        </td>
+                        <td>${studentCode}</td>
+                        <td>${record.subject_name || 'Unknown'}</td>
+                        <td>${date.toLocaleDateString('vi-VN')}</td>
+                        <td>${date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</td>
+                        <td>
+                            <span class="status-badge status-${statusClass}">${statusText}</span>
+                        </td>
+                        <td>${record.notes || '-'}</td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="editRecord(${record.id})" style="padding: 4px 8px; font-size: 0.75rem;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const total = attendanceLog.length;
+            const present = attendanceLog.filter(r => r.status === 'present').length;
+            const late = attendanceLog.filter(r => r.status === 'late').length;
+            const absent = attendanceLog.filter(r => r.status === 'absent').length;
+            const rate = total > 0 ? Math.round((present / total) * 100) : 0;
+
+            // Get unique students
+            const uniqueStudents = new Set(attendanceLog.map(r => r.student_id)).size;
+
+            document.getElementById('totalStudents').textContent = uniqueStudents;
+            document.getElementById('presentCount').textContent = present;
+            document.getElementById('lateCount').textContent = late;
+            document.getElementById('absentCount').textContent = absent;
+            document.getElementById('attendanceRate').textContent = rate + '%';
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const subjectFilter = document.getElementById('subjectFilter').value;
+            const studentFilter = document.getElementById('studentFilter').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+
+            filteredLog = attendanceLog.filter(record => {
+                const date = new Date(record.timestamp);
+                const recordDate = date.toISOString().split('T')[0];
+
+                // Subject filter
+                if (subjectFilter && record.subject_id != subjectFilter) {
+                    return false;
+                }
+
+                // Student filter
+                if (studentFilter) {
+                    const studentName = (record.student_name || '').toLowerCase();
+                    const studentCode = (record.student_code || '').toLowerCase();
+                    if (!studentName.includes(studentFilter) && !studentCode.includes(studentFilter)) {
+                        return false;
+                    }
+                }
+
+                // Status filter
+                if (statusFilter && record.status !== statusFilter) {
+                    return false;
+                }
+
+                // Date filter
+                if (dateFilter && recordDate !== dateFilter) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            displayAttendanceLog();
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('subjectFilter').value = '';
+            document.getElementById('studentFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('dateFilter').value = '';
+
+            filteredLog = [...attendanceLog];
+            displayAttendanceLog();
+        }
+
+        // Start attendance
+        function startAttendance() {
+            // Redirect to attendance interface
+            window.location.href = 'attendance-interface.html';
+        }
+
+        // Edit record
+        function editRecord(recordId) {
+            // Implement edit functionality
+            showToast('Chức năng chỉnh sửa đang được phát triển', 'info');
+        }
+
+        // Export data
+        function exportData() {
+            // Implement export functionality
+            showToast('Chức năng xuất Excel đang được phát triển', 'info');
+        }
+
+        // Update date time
+        function updateDateTime() {
+            const now = new Date();
+            const dateTimeElement = document.getElementById('currentDateTime');
+
+            if (dateTimeElement) {
+                const formatted = now.toLocaleString('vi-VN', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+
+                dateTimeElement.textContent = `🕒 ${formatted}`;
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            if (!alertContainer) return;
+
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+
+            alertContainer.appendChild(toast);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            window.location.href = '../login/login.html';
+        }
+    </script>
+</body>
+
+</html>

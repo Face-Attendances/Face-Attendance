@@ -1,38 +1,82 @@
 // Global variables
 let subjects = [];
-let teachers = [];
 let currentSubjectId = null;
 let deleteSubjectId = null;
 
 // API endpoints
-const API_BASE_URL = 'http://localhost:8000/api';
-const SUBJECTS_API = `${API_BASE_URL}/database/subjects/`;
-const TEACHERS_API = `${API_BASE_URL}/database/teachers/`;
+const SUBJECTS_API_BASE_URL = 'http://localhost:8000/api';
+const SUBJECTS_API = `${SUBJECTS_API_BASE_URL}/database/subjects/`;
+
+// Authentication helper
+async function getAuthHeaders() {
+    const token = localStorage.getItem('accessToken');
+
+    if (!token) {
+        showNotification('Không tìm thấy token. Vui lòng đăng nhập lại.', 'error');
+        setTimeout(() => {
+            window.location.href = '../login/login.html';
+        }, 2000);
+        return null;
+    }
+
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+    };
+}
+
+async function makeAuthenticatedRequest(url, options = {}) {
+    const headers = await getAuthHeaders();
+    if (!headers) return null;
+
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            ...headers,
+            ...options.headers
+        }
+    });
+
+    // If unauthorized, try to refresh token
+    if (response.status === 401) {
+        showNotification('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'warning');
+        setTimeout(() => {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            window.location.href = '../login/login.html';
+        }, 2000);
+        return null;
+    }
+
+    return response;
+}
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function () {
     loadSubjects();
-    loadTeachers();
     setupEventListeners();
 });
 
 // Setup event listeners
 function setupEventListeners() {
     // Search functionality
-    document.getElementById('searchSubject').addEventListener('input', function () {
-        filterSubjects();
-    });
+    const searchSubject = document.getElementById('searchSubject');
+    if (searchSubject) {
+        searchSubject.addEventListener('input', function () {
+            filterSubjects();
+        });
+    }
 
-    // Teacher filter
-    document.getElementById('filterTeacher').addEventListener('change', function () {
-        filterSubjects();
-    });
+
 
     // Form submission
-    document.getElementById('subjectForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        saveSubject();
-    });
+    const subjectForm = document.getElementById('subjectForm');
+    if (subjectForm) {
+        subjectForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            saveSubject();
+        });
+    }
 }
 
 // Load subjects from API
@@ -50,7 +94,6 @@ async function loadSubjects() {
             const data = await response.json();
             subjects = data;
             displaySubjects();
-            updateTeacherFilter();
         } else {
             console.error('Failed to load subjects:', response.status);
             showNotification('Lỗi khi tải danh sách môn học', 'error');
@@ -61,49 +104,25 @@ async function loadSubjects() {
     }
 }
 
-// Load teachers for dropdown
-async function loadTeachers() {
-    try {
-        // GET không cần gửi Authorization
-        const response = await fetch(TEACHERS_API, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
 
-        if (response.ok) {
-            const data = await response.json();
-            teachers = data;
-            updateTeacherDropdown();
-        } else {
-            console.error('Failed to load teachers:', response.status);
-        }
-    } catch (error) {
-        console.error('Error loading teachers:', error);
-    }
-}
 
 // Display subjects in table
 function displaySubjects() {
     const tbody = document.getElementById('subjectsTable');
-    tbody.innerHTML = '';
+    if (!tbody) return;
 
     subjects.forEach(subject => {
-        const teacher = teachers.find(t => t.id === subject.teacher) || {};
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${subject.subject_code || ''}</td>
-            <td>${subject.name || ''}</td>
-            <td>${teacher.name || 'N/A'}</td>
-            <td>${subject.time || ''}</td>
-            <td>${subject.room || ''}</td>
+            <td>${subject.subject_name || ''}</td>
             <td>${subject.credits || ''}</td>
+            <td>${subject.description || ''}</td>
             <td>
                 <button class="btn btn-sm btn-primary" onclick="editSubject(${subject.id})">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteSubject(${subject.id}, '${subject.name}')">
+                <button class="btn btn-sm btn-danger" onclick="deleteSubject(${subject.id}, '${subject.subject_name}')">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -112,54 +131,21 @@ function displaySubjects() {
     });
 }
 
-// Update teacher dropdown in form
-function updateTeacherDropdown() {
-    const select = document.getElementById('subjectTeacher');
-    select.innerHTML = '<option value="">Chọn giảng viên</option>';
 
-    teachers.forEach(teacher => {
-        const option = document.createElement('option');
-        option.value = teacher.id;
-        option.textContent = `${teacher.name} (${teacher.teacher_code})`;
-        select.appendChild(option);
-    });
-}
-
-// Update teacher filter dropdown
-function updateTeacherFilter() {
-    const select = document.getElementById('filterTeacher');
-    const currentValue = select.value;
-
-    select.innerHTML = '<option value="">Tất cả giảng viên</option>';
-
-    const uniqueTeachers = [...new Set(subjects.map(s => s.teacher))];
-    uniqueTeachers.forEach(teacherId => {
-        const teacher = teachers.find(t => t.id === teacherId);
-        if (teacher) {
-            const option = document.createElement('option');
-            option.value = teacherId;
-            option.textContent = teacher.name;
-            if (teacherId == currentValue) {
-                option.selected = true;
-            }
-            select.appendChild(option);
-        }
-    });
-}
 
 // Filter subjects
 function filterSubjects() {
-    const searchTerm = document.getElementById('searchSubject').value.toLowerCase();
-    const teacherFilter = document.getElementById('filterTeacher').value;
+    const searchSubject = /** @type {HTMLInputElement} */ (document.getElementById('searchSubject'));
+    if (!searchSubject) return;
+
+    const searchTerm = searchSubject.value.toLowerCase();
 
     const filtered = subjects.filter(subject => {
         const matchesSearch = !searchTerm ||
             (subject.subject_code && subject.subject_code.toLowerCase().includes(searchTerm)) ||
-            (subject.name && subject.name.toLowerCase().includes(searchTerm));
+            (subject.subject_name && subject.subject_name.toLowerCase().includes(searchTerm));
 
-        const matchesTeacher = !teacherFilter || subject.teacher == teacherFilter;
-
-        return matchesSearch && matchesTeacher;
+        return matchesSearch;
     });
 
     displayFilteredSubjects(filtered);
@@ -168,23 +154,20 @@ function filterSubjects() {
 // Display filtered subjects
 function displayFilteredSubjects(filteredSubjects) {
     const tbody = document.getElementById('subjectsTable');
-    tbody.innerHTML = '';
+    if (!tbody) return;
 
     filteredSubjects.forEach(subject => {
-        const teacher = teachers.find(t => t.id === subject.teacher) || {};
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${subject.subject_code || ''}</td>
-            <td>${subject.name || ''}</td>
-            <td>${teacher.name || 'N/A'}</td>
-            <td>${subject.time || ''}</td>
-            <td>${subject.room || ''}</td>
+            <td>${subject.subject_name || ''}</td>
             <td>${subject.credits || ''}</td>
+            <td>${subject.description || ''}</td>
             <td>
                 <button class="btn btn-sm btn-primary" onclick="editSubject(${subject.id})">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteSubject(${subject.id}, '${subject.name}')">
+                <button class="btn btn-sm btn-danger" onclick="deleteSubject(${subject.id}, '${subject.subject_name}')">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -195,23 +178,42 @@ function displayFilteredSubjects(filteredSubjects) {
 
 // Open modal for adding new subject
 function openModal(modalId) {
-    document.getElementById(modalId).style.display = 'block';
-    if (modalId === 'addSubjectModal') {
-        resetForm();
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+        if (modalId === 'addSubjectModal') {
+            resetForm();
+        }
     }
 }
 
 // Close modal
 function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 // Reset form
 function resetForm() {
-    document.getElementById('subjectForm').reset();
-    document.getElementById('subjectId').value = '';
-    document.getElementById('subjectModalTitle').textContent = 'Thêm môn học mới';
-    document.getElementById('subjectSubmitBtn').textContent = 'Thêm môn học';
+    const form = /** @type {HTMLFormElement} */ (document.getElementById('subjectForm'));
+    const subjectId = /** @type {HTMLInputElement} */ (document.getElementById('subjectId'));
+    const subjectModalTitle = document.getElementById('subjectModalTitle');
+    const subjectSubmitBtn = document.getElementById('subjectSubmitBtn');
+
+    if (form) {
+        form.reset();
+    }
+    if (subjectId) {
+        subjectId.value = '';
+    }
+    if (subjectModalTitle) {
+        subjectModalTitle.textContent = 'Thêm môn học mới';
+    }
+    if (subjectSubmitBtn) {
+        subjectSubmitBtn.textContent = 'Thêm môn học';
+    }
     currentSubjectId = null;
 }
 
@@ -220,17 +222,35 @@ function editSubject(id) {
     const subject = subjects.find(s => s.id === id);
     if (subject) {
         currentSubjectId = id;
-        document.getElementById('subjectId').value = subject.id;
-        document.getElementById('subjectCode').value = subject.subject_code || '';
-        document.getElementById('subjectName').value = subject.name || '';
-        document.getElementById('subjectTeacher').value = subject.teacher || '';
-        document.getElementById('subjectTime').value = subject.time || '';
-        document.getElementById('subjectRoom').value = subject.room || '';
-        document.getElementById('subjectCredits').value = subject.credits || '';
-        document.getElementById('subjectDescription').value = subject.description || '';
+        const subjectId = /** @type {HTMLInputElement} */ (document.getElementById('subjectId'));
+        const subjectCode = /** @type {HTMLInputElement} */ (document.getElementById('subjectCode'));
+        const subjectName = /** @type {HTMLInputElement} */ (document.getElementById('subjectName'));
+        const subjectCredits = /** @type {HTMLInputElement} */ (document.getElementById('subjectCredits'));
+        const subjectDescription = /** @type {HTMLTextAreaElement} */ (document.getElementById('subjectDescription'));
+        const subjectModalTitle = document.getElementById('subjectModalTitle');
+        const subjectSubmitBtn = document.getElementById('subjectSubmitBtn');
 
-        document.getElementById('subjectModalTitle').textContent = 'Chỉnh sửa môn học';
-        document.getElementById('subjectSubmitBtn').textContent = 'Cập nhật môn học';
+        if (subjectId) {
+            subjectId.value = subject.id;
+        }
+        if (subjectCode) {
+            subjectCode.value = subject.subject_code || '';
+        }
+        if (subjectName) {
+            subjectName.value = subject.subject_name || '';
+        }
+        if (subjectCredits) {
+            subjectCredits.value = subject.credits || '';
+        }
+        if (subjectDescription) {
+            subjectDescription.value = subject.description || '';
+        }
+        if (subjectModalTitle) {
+            subjectModalTitle.textContent = 'Chỉnh sửa môn học';
+        }
+        if (subjectSubmitBtn) {
+            subjectSubmitBtn.textContent = 'Cập nhật môn học';
+        }
 
         openModal('addSubjectModal');
     }
@@ -238,34 +258,35 @@ function editSubject(id) {
 
 // Save subject (create or update)
 async function saveSubject() {
-    const formData = new FormData(document.getElementById('subjectForm'));
+    const form = /** @type {HTMLFormElement} */ (document.getElementById('subjectForm'));
+    if (!form) return;
+
+    const formData = new FormData(form);
+    const creditsValue = formData.get('credits');
     const subjectData = {
         subject_code: formData.get('subject_code'),
-        name: formData.get('name'),
-        teacher: formData.get('teacher'),
-        time: formData.get('time'),
-        room: formData.get('room'),
-        credits: formData.get('credits') ? parseInt(formData.get('credits')) : null,
+        subject_name: formData.get('subject_name'),
+        credits: creditsValue ? parseInt(String(creditsValue)) : null,
         description: formData.get('description')
     };
 
     try {
-        const token = localStorage.getItem('accessToken');
-        const url = currentSubjectId ? `${SUBJECTS_API}${currentSubjectId}/` : `${SUBJECTS_API}create/`;
+        const url = currentSubjectId ? `${SUBJECTS_API}${currentSubjectId}/update/` : `${SUBJECTS_API}create/`;
         const method = currentSubjectId ? 'PUT' : 'POST';
 
         // Log dữ liệu gửi lên
         console.log('Subject data gửi lên:', subjectData);
         console.log('URL:', url, 'Method:', method);
 
-        const response = await fetch(url, {
+        const response = await makeAuthenticatedRequest(url, {
             method: method,
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify(subjectData)
         });
+
+        if (!response) {
+            showNotification('Lỗi xác thực. Vui lòng đăng nhập lại.', 'error');
+            return;
+        }
 
         if (response.ok) {
             const result = await response.json();
@@ -305,35 +326,60 @@ async function saveSubject() {
 // Delete subject
 function deleteSubject(id, name) {
     deleteSubjectId = id;
-    document.getElementById('deleteSubjectName').textContent = name;
+    const deleteSubjectName = document.getElementById('deleteSubjectName');
+    if (deleteSubjectName) {
+        deleteSubjectName.textContent = name;
+    }
     openModal('deleteModal');
 }
 
 // Confirm delete
 async function confirmDelete() {
-    if (!deleteSubjectId) return;
+    if (!deleteSubjectId) {
+        showNotification('Không có môn học nào được chọn để xóa', 'error');
+        return;
+    }
 
     try {
-        const token = localStorage.getItem('accessToken');
-        const response = await fetch(`${SUBJECTS_API}${deleteSubjectId}/`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+        console.log('🗑️ Deleting subject ID:', deleteSubjectId);
+
+        const response = await makeAuthenticatedRequest(`${SUBJECTS_API}${deleteSubjectId}/delete/`, {
+            method: 'DELETE'
         });
 
+        if (!response) {
+            showNotification('Lỗi xác thực. Vui lòng đăng nhập lại.', 'error');
+            return;
+        }
+
+        console.log('Delete response status:', response.status);
+        console.log('Delete response ok:', response.ok);
+
         if (response.ok) {
-            showNotification('Xóa môn học thành công!', 'success');
-            closeModal('deleteModal');
-            loadSubjects();
+            // Handle both 200 and 204 status codes as success
+            if (response.status === 204 || response.status === 200) {
+                showNotification('Xóa môn học thành công!', 'success');
+                closeModal('deleteModal');
+                deleteSubjectId = null; // Reset
+                await loadSubjects(); // Reload data
+            } else {
+                const errorData = await response.json();
+                showNotification('Lỗi khi xóa: ' + (errorData.message || 'Unknown error'), 'error');
+            }
         } else {
-            console.error('Failed to delete subject:', response.status);
-            showNotification('Lỗi khi xóa môn học', 'error');
+            let errorMessage = 'Lỗi khi xóa môn học';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorData.error || errorMessage;
+            } catch (e) {
+                console.log('Could not parse error response');
+            }
+            console.error('Failed to delete subject:', response.status, errorMessage);
+            showNotification(errorMessage, 'error');
         }
     } catch (error) {
-        console.error('Error deleting subject:', error);
-        showNotification('Lỗi kết nối khi xóa môn học', 'error');
+        console.error('Network error deleting subject:', error);
+        showNotification('Lỗi kết nối khi xóa môn học: ' + error.message, 'error');
     }
 }
 
@@ -364,7 +410,7 @@ window.onclick = function (event) {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         if (event.target === modal) {
-            modal.style.display = 'none';
+            /** @type {HTMLElement} */ (modal).style.display = 'none';
         }
     });
 } 

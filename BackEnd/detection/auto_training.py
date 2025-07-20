@@ -136,7 +136,7 @@ class AttendanceWithConfidence:
         self.attendance_images_dir = Path(settings.MEDIA_ROOT) / 'attendance_images'
         self.attendance_images_dir.mkdir(parents=True, exist_ok=True)
     
-    def process_attendance(self, image, subject_name, detected_by_user=None):
+    def process_attendance(self, image, subject_name, detected_by_user=None, student_code=None):
         """Xử lý attendance với confidence score"""
         try:
             # Lưu ảnh attendance
@@ -148,62 +148,55 @@ class AttendanceWithConfidence:
                 for chunk in image.chunks():
                     f.write(chunk)
             
+            # Tìm student theo student_code
+            try:
+                student = Student.objects.get(student_code=student_code)
+            except Student.DoesNotExist:
+                return {
+                    'success': False,
+                    'message': f'Không tìm thấy sinh viên với mã số {student_code}'
+                }
+            
             # Đọc ảnh và detect faces
             image_array = face_recognition.load_image_file(str(image_path))
             face_locations = face_recognition.face_locations(image_array)
             face_encodings = face_recognition.face_encodings(image_array, face_locations)
             
-            results = []
+            if not face_encodings:
+                return {
+                    'success': False,
+                    'message': 'Không phát hiện được khuôn mặt trong ảnh'
+                }
             
-            for face_encoding in face_encodings:
-                # So sánh với tất cả encodings đã lưu
-                best_match = self._find_best_match(face_encoding)
+            # So sánh với encoding của student
+            best_match = self._find_best_match(face_encodings[0], student_code)
+            
+            if best_match:
+                confidence_percentage = (1 - best_match) * 100
                 
-                if best_match:
-                    student_code, confidence = best_match
-                    confidence_percentage = (1 - confidence) * 100
-                    
-                    # Tìm student
-                    try:
-                        student = Student.objects.get(student_code=student_code)
-                        
-                        # Tạo attendance record
-                        attendance = Attendance.objects.create(
-                            student=student,
-                            subject=subject_name,
-                            status='present',
-                            face_detection_confidence=confidence_percentage,
-                            detected_by=detected_by_user,
-                            image_path=str(image_path)
-                        )
-                        
-                        results.append({
-                            'student_code': student_code,
-                            'student_name': student.name,
-                            'confidence': round(confidence_percentage, 2),
-                            'status': 'present'
-                        })
-                        
-                    except Student.DoesNotExist:
-                        results.append({
-                            'student_code': student_code,
-                            'student_name': 'Unknown',
-                            'confidence': round(confidence_percentage, 2),
-                            'status': 'unknown'
-                        })
-                else:
-                    results.append({
-                        'student_code': 'Unknown',
-                        'student_name': 'Unknown',
-                        'confidence': 0.0,
-                        'status': 'unknown'
-                    })
-            
-            return {
-                'success': True,
-                'results': results,
-                'image_path': str(image_path)
-            }
+                # Tạo attendance record
+                attendance = Attendance.objects.create(
+                    student=student,
+                    subject=subject_name,
+                    status='present',
+                    face_detection_confidence=confidence_percentage,
+                    detected_by=detected_by_user,
+                    image_path=str(image_path)
+                )
+                
+                return {
+                    'success': True,
+                    'message': f'Điểm danh thành công cho {student.name}',
+                    'student_code': student_code,
+                    'student_name': student.name,
+                    'confidence': round(confidence_percentage, 2),
+                    'status': 'present'
+                }
+            else:
+                return {
+                    'success': False,
+                    'message': 'Khuôn mặt không khớp với dữ liệu đã đăng ký'
+                }
             
         except Exception as e:
             return {
@@ -211,25 +204,23 @@ class AttendanceWithConfidence:
                 'message': f'Lỗi: {str(e)}'
             }
     
-    def _find_best_match(self, face_encoding):
-        """Tìm student có encoding gần nhất"""
-        best_match = None
-        best_distance = float('inf')
-        
-        # Duyệt qua tất cả file encodings
-        for enc_file in self.encodings_dir.glob('*_encodings.npy'):
-            try:
-                stored_encodings = np.load(str(enc_file))
-                distances = face_recognition.face_distance(stored_encodings, face_encoding)
+    def _find_best_match(self, face_encoding, student_code):
+        """Tìm encoding của student cụ thể"""
+        try:
+            enc_file = self.encodings_dir / f"{student_code}_encodings.npy"
+            
+            if not enc_file.exists():
+                return None
+            
+            stored_encodings = np.load(str(enc_file))
+            distances = face_recognition.face_distance(stored_encodings, face_encoding)
+            
+            min_distance = np.min(distances)
+            if min_distance < 0.6:  # Threshold
+                return min_distance
+            else:
+                return None
                 
-                min_distance = np.min(distances)
-                if min_distance < best_distance and min_distance < 0.6:  # Threshold
-                    best_distance = min_distance
-                    student_code = enc_file.stem.replace('_encodings', '')
-                    best_match = (student_code, min_distance)
-                    
-            except Exception as e:
-                print(f"Lỗi đọc encoding file {enc_file}: {e}")
-                continue
-        
-        return best_match 
+        except Exception as e:
+            print(f"Lỗi đọc encoding file cho {student_code}: {e}")
+            return None 

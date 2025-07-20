@@ -7,6 +7,57 @@ const API_BASE_URL = 'http://localhost:8000/api';
 let currentUser = null;
 let dashboardData = {};
 
+// Get authentication token
+const token = localStorage.getItem('accessToken');
+
+// Helper function to get fetch headers with authorization
+function getAuthHeaders() {
+    const token = localStorage.getItem('accessToken');
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+
+    if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+    }
+
+    return headers;
+}
+
+// Refresh token function
+async function refreshToken() {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+        console.error('No refresh token found');
+        return false;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/refresh/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                refresh: refreshToken
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('accessToken', data.access);
+            console.log('Token refreshed successfully');
+            return true;
+        } else {
+            console.error('Failed to refresh token');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error refreshing token:', error);
+        return false;
+    }
+}
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', function () {
     loadDashboardData();
@@ -38,17 +89,71 @@ function setupEventListeners() {
 
 // Load dashboard data
 async function loadDashboardData() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/database/attendance/summary/`);
-        const data = await response.json();
+    console.log('🔄 Loading dashboard data...');
+    console.log('🔑 Auth headers:', getAuthHeaders());
+    console.log('🌐 API URL:', `${API_BASE_URL}/database/dashboard/stats/`);
 
-        if (data.success) {
-            dashboardData = data.data;
+    try {
+        const response = await fetch(`${API_BASE_URL}/database/dashboard/stats/`, {
+            headers: getAuthHeaders()
+        });
+
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response headers:', response.headers);
+
+        const data = await response.json();
+        console.log('📊 Dashboard data received:', data);
+
+        if (response.ok) {
+            dashboardData = data;
             updateDashboardCards();
+            console.log('✅ Dashboard data loaded successfully');
+        } else {
+            console.error('❌ API Error:', data);
+
+            // Handle 401 Unauthorized - try to refresh token
+            if (response.status === 401) {
+                console.log('🔄 Token expired, attempting to refresh...');
+                const refreshSuccess = await refreshToken();
+
+                if (refreshSuccess) {
+                    console.log('🔄 Retrying with new token...');
+                    // Retry the request with new token
+                    const retryResponse = await fetch(`${API_BASE_URL}/database/dashboard/stats/`, {
+                        headers: getAuthHeaders()
+                    });
+
+                    if (retryResponse.ok) {
+                        const retryData = await retryResponse.json();
+                        dashboardData = retryData;
+                        updateDashboardCards();
+                        console.log('✅ Dashboard data loaded successfully after token refresh');
+                        return;
+                    }
+                }
+
+                showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'error');
+                setTimeout(() => {
+                    window.location.href = '../login/login.html';
+                }, 2000);
+            } else if (response.status === 404) {
+                showToast('API endpoint không tồn tại', 'error');
+            } else {
+                showToast(`Lỗi API: ${data.error || data.detail || 'Unknown error'}`, 'error');
+            }
         }
     } catch (error) {
-        console.error('Error loading dashboard data:', error);
-        showToast('Lỗi khi tải dữ liệu dashboard', 'error');
+        console.error('💥 Network/Parse Error:', error);
+        showToast('Lỗi kết nối: ' + error.message, 'error');
+
+        // Set default values to show something
+        dashboardData = {
+            total_students: 0,
+            total_teachers: 0,
+            total_subjects: 0,
+            today_attendance: 0
+        };
+        updateDashboardCards();
     }
 }
 
@@ -63,7 +168,9 @@ function updateDashboardCards() {
 // Load recent activity
 async function loadRecentActivity() {
     try {
-        const response = await fetch(`${API_BASE_URL}/database/attendance/history/?days=7`);
+        const response = await fetch(`${API_BASE_URL}/database/attendance/history/?days=7`, {
+            headers: getAuthHeaders()
+        });
         const data = await response.json();
 
         if (data.success) {
@@ -103,7 +210,9 @@ async function loadStatistics() {
     const days = document.getElementById('timeRange').value;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/database/attendance/summary/?days=${days}`);
+        const response = await fetch(`${API_BASE_URL}/database/attendance/summary/?days=${days}`, {
+            headers: getAuthHeaders()
+        });
         const data = await response.json();
 
         if (data.success) {
@@ -143,13 +252,23 @@ function filterActivity() {
 // Load teachers for select dropdown
 async function loadTeachersForSelect() {
     try {
-        const response = await fetch(`${API_BASE_URL}/users/teachers/`);
+        const response = await fetch(`${API_BASE_URL}/users/teachers/`, {
+            headers: getAuthHeaders()
+        });
         const data = await response.json();
 
         const select = document.getElementById('teacherSelect');
         select.innerHTML = '<option value="">Chọn giảng viên</option>';
 
-        data.forEach(teacher => {
+        // Handle the API response format: {success: true, data: [...]}
+        let teachers = [];
+        if (data.success && data.data) {
+            teachers = data.data;
+        } else if (Array.isArray(data)) {
+            teachers = data;
+        }
+
+        teachers.forEach(teacher => {
             const option = document.createElement('option');
             option.value = teacher.id;
             option.textContent = teacher.full_name;
@@ -176,9 +295,7 @@ async function handleAddStudent(event) {
     try {
         const response = await fetch(`${API_BASE_URL}/database/students/`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(studentData)
         });
 
@@ -215,9 +332,7 @@ async function handleAddTeacher(event) {
     try {
         const response = await fetch(`${API_BASE_URL}/users/register/`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(teacherData)
         });
 
@@ -253,9 +368,7 @@ async function handleAddSubject(event) {
     try {
         const response = await fetch(`${API_BASE_URL}/database/subjects/`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(subjectData)
         });
 

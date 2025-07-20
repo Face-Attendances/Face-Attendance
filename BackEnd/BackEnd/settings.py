@@ -39,7 +39,7 @@ SECRET_KEY = 'django-insecure-s2s_zpx^#&9dw9zji_$^!jx%yme2s**y)q#3mp4btxfwh1_aya
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -68,6 +68,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # Move CORS to top
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -75,7 +76,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 REST_FRAMEWORK = {
@@ -88,7 +88,6 @@ REST_FRAMEWORK = {
 }
 
 ROOT_URLCONF = 'BackEnd.urls'
-CORS_ALLOW_ALL_ORIGINS = True  # hoặc định rõ domains
 
 TEMPLATES = [
     {
@@ -114,14 +113,11 @@ WSGI_APPLICATION = 'BackEnd.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'face_attendance',
+        'NAME': 'railway',
         'USER': 'root',
-        'PASSWORD': '',  # Nếu có mật khẩu thì điền vào đây
-        'HOST': '127.0.0.1',
-        'PORT': '3307',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        'PASSWORD': 'RhFixHPckIVhFqreexyZIKxrcagAOdut',
+        'HOST': 'nozomi.proxy.rlwy.net',
+        'PORT': '49011',
     }
 }
 
@@ -147,7 +143,50 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Cấu hình CORS
-CORS_ALLOW_ALL_ORIGINS = True  # Cho phép tất cả các nguồn gốc (origins) truy cập
+# CORS settings for development - allow all origins
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# Alternative: specific origins (uncomment if you want to restrict)
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5500",  # Live Server
+#     "http://127.0.0.1:5500",  # Live Server alternative
+#     "http://localhost:3000",  # React dev server
+#     "http://127.0.0.1:3000",  # React dev server alternative
+#     "file://",  # File protocol for direct HTML access
+# ]
+
+# Allow specific headers for token-based auth
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# Allow specific methods
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Session and CSRF settings for cross-origin
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+
+# Add localhost to allowed hosts
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -165,6 +204,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

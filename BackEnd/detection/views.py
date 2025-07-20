@@ -161,11 +161,13 @@ def process_attendance_with_confidence(request):
     Form-data:
     - image: File ảnh
     - subject_name: Tên môn học
+    - student_code: Mã số sinh viên
     - detected_by: ID của user thực hiện (optional)
     """
     try:
         image = request.FILES.get('image')
         subject_name = request.data.get('subject_name')
+        student_code = request.data.get('student_code')
         detected_by_id = request.data.get('detected_by')
         
         if not image:
@@ -180,6 +182,12 @@ def process_attendance_with_confidence(request):
                 'message': 'Thiếu tên môn học'
             }, status=status.HTTP_400_BAD_REQUEST)
         
+        if not student_code:
+            return Response({
+                'success': False,
+                'message': 'Thiếu mã số sinh viên'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
         # Lấy user nếu có
         detected_by_user = None
         if detected_by_id:
@@ -190,7 +198,7 @@ def process_attendance_with_confidence(request):
                 pass
         
         # Xử lý attendance
-        result = attendance_service.process_attendance(image, subject_name, detected_by_user)
+        result = attendance_service.process_attendance(image, subject_name, detected_by_user, student_code)
         
         if result['success']:
             return Response(result, status=status.HTTP_200_OK)

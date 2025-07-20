@@ -147,10 +147,17 @@ function updateDepartmentFilter() {
     });
 }
 
+// Add new teacher function
+function addNewTeacher() {
+    currentTeacherId = null;
+    resetForm();
+    openModal('addTeacherModal');
+}
+
 // Open modal for adding new teacher
 function openModal(modalId) {
     document.getElementById(modalId).style.display = 'block';
-    if (modalId === 'addTeacherModal') {
+    if (modalId === 'addTeacherModal' && !currentTeacherId) {
         resetForm();
     }
 }
@@ -183,8 +190,15 @@ function editTeacher(id) {
         document.getElementById('teacherPhone').value = teacher.phone_number || '';
         document.getElementById('teacherAddress').value = teacher.address || '';
 
-        document.getElementById('teacherModalTitle').textContent = 'Chỉnh sửa giảng viên';
-        document.getElementById('teacherSubmitBtn').textContent = 'Cập nhật giảng viên';
+        const modalTitle = document.getElementById('teacherModalTitle');
+        const submitBtn = document.getElementById('teacherSubmitBtn');
+
+        if (modalTitle) {
+            modalTitle.textContent = 'Chỉnh sửa giảng viên';
+        }
+        if (submitBtn) {
+            submitBtn.textContent = 'Cập nhật giảng viên';
+        }
 
         openModal('addTeacherModal');
     }
@@ -192,6 +206,7 @@ function editTeacher(id) {
 
 // Save teacher (create or update)
 async function saveTeacher() {
+    const token = localStorage.getItem('accessToken'); // Đảm bảo token luôn được khai báo trong hàm
     const formData = new FormData(document.getElementById('teacherForm'));
     const teacherData = {
         teacher_code: formData.get('teacher_code'),
@@ -213,9 +228,19 @@ async function saveTeacher() {
     }
 
     try {
-        const token = localStorage.getItem('accessToken');
-        const url = currentTeacherId ? `${TEACHERS_API}${currentTeacherId}/` : `${TEACHERS_API}create/`;
-        const method = currentTeacherId ? 'PUT' : 'POST';
+        let url, method;
+        if (currentTeacherId) {
+            const teacher = teachers.find(t => t.id === currentTeacherId);
+            if (!teacher) {
+                showNotification('Không tìm thấy giảng viên để cập nhật', 'error');
+                return;
+            }
+            url = `${TEACHERS_API}${teacher.teacher_code}/update/`;
+            method = 'PUT';
+        } else {
+            url = `${TEACHERS_API}create/`;
+            method = 'POST';
+        }
 
         console.log('=== DEBUG: Request Info ===');
         console.log('URL:', url);
@@ -225,8 +250,8 @@ async function saveTeacher() {
         const response = await fetch(url, {
             method: method,
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token // Thêm Authorization header
             },
             body: JSON.stringify(teacherData)
         });
@@ -290,29 +315,53 @@ function deleteTeacher(id, name) {
 
 // Confirm delete
 async function confirmDelete() {
-    if (!deleteTeacherId) return;
-
+    if (!deleteTeacherId) {
+        showNotification('Không có giảng viên nào được chọn để xóa', 'error');
+        return;
+    }
     try {
-        const token = localStorage.getItem('accessToken');
-        const response = await fetch(`${TEACHERS_API}${deleteTeacherId}/delete/`, {
+        const token = localStorage.getItem('accessToken'); // Lấy token
+        const teacher = teachers.find(t => t.id === deleteTeacherId);
+        if (!teacher) {
+            showNotification('Không tìm thấy giảng viên để xóa', 'error');
+            return;
+        }
+        const response = await fetch(`${TEACHERS_API}${teacher.teacher_code}/delete/`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token // Thêm Authorization header
             }
         });
 
+        console.log('Delete response status:', response.status);
+        console.log('Delete response ok:', response.ok);
+
         if (response.ok) {
-            showNotification('Xóa giảng viên thành công!', 'success');
-            closeModal('deleteModal');
-            loadTeachers();
+            // Handle both 200 and 204 status codes as success
+            if (response.status === 204 || response.status === 200) {
+                showNotification('Xóa giảng viên thành công!', 'success');
+                closeModal('deleteModal');
+                deleteTeacherId = null; // Reset
+                await loadTeachers(); // Reload data
+            } else {
+                const errorData = await response.json();
+                showNotification('Lỗi khi xóa: ' + (errorData.message || 'Unknown error'), 'error');
+            }
         } else {
-            console.error('Failed to delete teacher:', response.status);
-            showNotification('Lỗi khi xóa giảng viên', 'error');
+            let errorMessage = 'Lỗi khi xóa giảng viên';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorData.error || errorMessage;
+            } catch (e) {
+                console.log('Could not parse error response');
+            }
+            console.error('Failed to delete teacher:', response.status, errorMessage);
+            showNotification(errorMessage, 'error');
         }
     } catch (error) {
-        console.error('Error deleting teacher:', error);
-        showNotification('Lỗi kết nối khi xóa giảng viên', 'error');
+        console.error('Network error deleting teacher:', error);
+        showNotification('Lỗi kết nối khi xóa giảng viên: ' + error.message, 'error');
     }
 }
 
